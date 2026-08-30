@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xojiakbar Saydullayev — Creative Frontend Developer</title>
+  <meta name="description" content="Xojiakbar Saydullayev — g'oyalarni interfeysga aylantiruvchi frontend dasturchi.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <span class="loader-text">XS</span>
+  </div>
+
+  <!-- CUSTOM CURSOR -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise"></div>
+
+  <!-- GRADIENT BLOBS (fon) -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="#top" class="logo" data-hover>XS<span>.</span></a>
+      <nav class="nav-menu">
+        <a href="#work" class="nav-link" data-hover>Loyihalar</a>
+        <a href="#about" class="nav-link" data-hover>Skill</a>
+        <a href="#contact" class="nav-link" data-hover>Aloqa</a>
+      </nav>
+      <a href="#contact" class="nav-cta" data-hover>Hamkorlik <span>&rarr;</span></a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <p class="hero-tag reveal">FRONTEND DEVELOPER — TOSHKENT</p>
+
+    <h1 class="hero-title">
+      <span class="line" data-hover>
+        <span class="word">G'oyalarni</span>
+      </span>
+      <span class="line" data-hover>
+        <span class="word grad-text">interfeysga</span>
+      </span>
+      <span class="line" data-hover>
+        <span class="word">aylantiraman.</span>
+      </span>
+    </h1>
+
+    <div class="hero-bottom reveal">
+      <p class="hero-desc">
+        HTML, CSS, JavaScript va React bilan chiroyli, tez va real
+        ishlaydigan veb-tajribalar yarataman. Har bir piksel o'z o'rnida.
+      </p>
+      <a href="#work" class="magnetic-btn" data-hover>
+        <span>Loyihalarni ko'rish</span>
+        <img src="https://api.iconify.design/mdi:arrow-bottom-right.svg?color=%23050505" alt="">
+      </a>
+    </div>
+
+    <div class="hero-avatar-orbit reveal">
+      <div class="hero-photo" id="heroPhoto">XS</div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>FRONTEND DEVELOPMENT</span>
+        <span class="dot">•</span>
+        <span>REACT</span>
+        <span class="dot">•</span>
+        <span>JAVASCRIPT</span>
+        <span class="dot">•</span>
+        <span>UI / UX</span>
+        <span class="dot">•</span>
+        <span>CREATIVE CODE</span>
+        <span class="dot">•</span>
+        <span>REST API</span>
+        <span class="dot">•</span>
+      </div>
+      <div class="marquee-track" aria-hidden="true">
+        <span>FRONTEND DEVELOPMENT</span>
+        <span class="dot">•</span>
+        <span>REACT</span>
+        <span class="dot">•</span>
+        <span>JAVASCRIPT</span>
+        <span class="dot">•</span>
+        <span>UI / UX</span>
+        <span class="dot">•</span>
+        <span>CREATIVE CODE</span>
+        <span class="dot">•</span>
+        <span>REST API</span>
+        <span class="dot">•</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENTO / SKILLS -->
+  <section class="section" id="about">
+    <div class="section-head">
+      <p class="section-eyebrow reveal">Nima qila olaman</p>
+      <h2 class="section-title reveal">Bitta qo'l bilan <span class="grad-text">dizayn</span>, ikkinchisi bilan <span class="grad-text">kod</span>.</h2>
+    </div>
+
+    <div class="bento-grid">
+      <div class="bento-card bento-lg tilt reveal">
+        <img src="https://api.iconify.design/mdi:react.svg?color=%23ffffff" alt="" class="bento-icon">
+        <h3>Interaktiv interfeyslar</h3>
+        <p>React va vanilla JavaScript bilan tez, silliq va real funksiyalarga ega ilovalar quraman — statik maketlar emas.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <img src="https://api.iconify.design/mdi:api.svg?color=%23ffffff" alt="" class="bento-icon">
+        <h3>API integratsiya</h3>
+        <p>Real ma'lumotlarni tashqi API'lardan ulash va ekranga chiqarish.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <img src="https://api.iconify.design/mdi:cellphone-link.svg?color=%23ffffff" alt="" class="bento-icon">
+        <h3>Responsive dizayn</h3>
+        <p>Telefon, planshet, kompyuter — har qanday ekranda bir xil sifat.</p>
+      </div>
+      <div class="bento-card bento-lg tilt reveal">
+        <img src="https://api.iconify.design/mdi:lightning-bolt.svg?color=%23ffffff" alt="" class="bento-icon">
+        <h3>Animatsiya va mikro-interaksiyalar</h3>
+        <p>Sahifani "jonlantiradigan" kichik detallar — scroll animatsiyalari, hover effektlari, silliq o'tishlar. Aynan shu narsalar oddiy saytni esda qoladigan tajribaga aylantiradi.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <img src="https://api.iconify.design/mdi:database-outline.svg?color=%23ffffff" alt="" class="bento-icon">
+        <h3>Ma'lumot saqlash</h3>
+        <p>localStorage bilan foydalanuvchi holatini saqlash.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <img src="https://api.iconify.design/mdi:rocket-launch-outline.svg?color=%23ffffff" alt="" class="bento-icon">
+        <h3>Tezkor yetkazish</h3>
+        <p>G'oyadan tayyor, deploy qilingan saytgacha — qisqa muddatda.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="section work-section" id="work">
+    <div class="section-head">
+      <p class="section-eyebrow reveal">Tanlangan ishlar</p>
+      <h2 class="section-title reveal">Loyihalar <span class="grad-text">galereyasi</span></h2>
+    </div>
+
+    <div class="work-list" id="workList"></div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section stats-section">
+    <div class="stats-grid">
+      <div class="stat reveal">
+        <span class="stat-num" data-count="7">0</span><span class="stat-plus grad-text">+</span>
+        <p>Tugallangan loyiha</p>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-num" data-count="6">0</span>
+        <p>Ochiq manba repo</p>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-num" data-count="3">0</span>
+        <p>Real API integratsiya</p>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-num" data-count="100">0</span><span class="stat-plus grad-text">%</span>
+        <p>Detallarga e'tibor</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contact">
+    <div class="cta-glow"></div>
+    <p class="section-eyebrow reveal center">Keyingi qadam</p>
+    <h2 class="cta-title reveal">Loyiha g'oyangiz bormi?<br><span class="grad-text">Kelib gaplashamiz.</span></h2>
+    <a href="mailto:xojiakbarsaydullaev13@gmail.com" class="magnetic-btn cta-btn reveal" data-hover>
+      <span>Menga yozing</span>
+      <img src="https://api.iconify.design/mdi:arrow-bottom-right.svg?color=%23050505" alt="">
+    </a>
+
+    <div class="cta-socials reveal">
+      <a href="https://github.com/xojiakbar3031" target="_blank" rel="noopener" data-hover>GitHub</a>
+      <a href="https://t.me/FEL1X333" target="_blank" rel="noopener" data-hover>Telegram</a>
+      <a href="https://instagram.com/dv.felix_" target="_blank" rel="noopener" data-hover>Instagram</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; <span id="year"></span> Xojiakbar Saydullayev</p>
+    <a href="#top" class="footer-top" data-hover>Tepaga &uarr;</a>
+  </footer>
+
+  <script src="projects.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
