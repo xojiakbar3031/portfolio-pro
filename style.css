@@ -65,7 +65,7 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
 }
 
 .loader.done {
@@ -73,21 +73,48 @@ h1, h2, h3 {
   visibility: hidden;
 }
 
-.loader-text {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  background: var(--gradient);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradShift 1.2s ease infinite, pulse 1.2s ease infinite;
+.loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.9); opacity: 0.6; }
+.loader-num {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 88px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.loader-num::after {
+  content: "%";
+  font-size: 32px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+.loader-bar {
+  width: 220px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gradient);
+}
+
+.loader-caption {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
 }
 
 /* ==================== CUSTOM CURSOR ==================== */
@@ -122,8 +149,43 @@ h1, h2, h3 {
   border-color: transparent;
 }
 
+.cursor-ring.hidden-for-label {
+  opacity: 0;
+}
+
+/* Tashqi element faqat POZITSIYA uchun (JS orqali har mousemove'da
+   transition'siz, aniq yangilanadi — shu bilan kursor "kechikmaydi").
+   Ichki <span> esa faqat SCALE/OPACITY uchun (CSS orqali silliq animatsiya). */
+.cursor-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 998;
+  pointer-events: none;
+}
+
+.cursor-label span {
+  display: inline-block;
+  transform: translate(-50%, -50%) scale(0.4);
+  background: var(--gradient);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.cursor-label.active span {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
 @media (pointer: coarse) {
-  .cursor-dot, .cursor-ring { display: none; }
+  .cursor-dot, .cursor-ring, .cursor-label { display: none; }
   body { cursor: auto; }
 }
 
@@ -189,16 +251,33 @@ h1, h2, h3 {
   50% { transform: translate(50px, -70px); }
 }
 
+/* ==================== SCROLL PROGRESS ==================== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: var(--gradient);
+  background-size: 200% auto;
+  z-index: 200;
+  transition: width 0.1s linear;
+}
+
 /* ==================== REVEAL ==================== */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateY(32px) scale(0.97);
+  filter: blur(10px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  filter: blur(0);
 }
 
 /* ==================== LAYOUT HELPERS ==================== */
@@ -284,62 +363,22 @@ h1, h2, h3 {
   color: var(--text);
 }
 
-.nav-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.nav-cta:hover {
-  border-color: var(--accent-3);
-  transform: translateY(-2px);
-}
-
 /* ==================== HERO ==================== */
 .hero {
   position: relative;
   z-index: 2;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 140px 8vw 100px;
-  overflow: hidden;
+  align-items: center;
+  padding: 140px 8vw 80px;
 }
 
-/* Fon rasm — katta, butun hero'ni egallaydi */
-.hero-media {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.hero-media img {
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 60px;
+  align-items: center;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 68% 12%;
-  transform: scale(1.06);
-  will-change: transform;
-}
-
-.hero-media-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(0deg, var(--bg) 0%, rgba(10, 6, 3, 0.55) 42%, rgba(10, 6, 3, 0.15) 65%),
-    linear-gradient(100deg, rgba(10, 6, 3, 0.96) 0%, rgba(10, 6, 3, 0.7) 32%, rgba(10, 6, 3, 0.05) 62%);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
 }
 
 .hero-tag {
@@ -351,11 +390,10 @@ h1, h2, h3 {
 }
 
 .hero-title {
-  font-size: clamp(48px, 9vw, 118px);
+  font-size: clamp(40px, 6vw, 84px);
   font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -3px;
-  max-width: 1100px;
+  line-height: 1.02;
+  letter-spacing: -2.5px;
 }
 
 .hero-title .line {
@@ -379,43 +417,166 @@ h1, h2, h3 {
 }
 
 .hero-bottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 40px;
-  flex-wrap: wrap;
-  margin-top: 48px;
+  margin-top: 40px;
 }
 
 .hero-desc {
-  max-width: 380px;
+  max-width: 420px;
   color: var(--text-dim);
   font-size: 16px;
   line-height: 1.6;
+  margin-bottom: 32px;
 }
 
-.magnetic-btn {
+/* ---- Freym ichidagi rasm (art-directed kompozitsiya) ---- */
+.hero-frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 28px;
+  transform: rotate(2deg);
+  will-change: transform;
+}
+
+.hero-frame-photo {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+}
+
+.hero-frame-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  filter: saturate(1.08) contrast(1.05);
+  transform: scale(1.04);
+  will-change: transform;
+}
+
+.hero-frame-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(200deg, transparent 55%, rgba(10, 6, 3, 0.55) 100%);
+  pointer-events: none;
+}
+
+.hero-frame-tag {
+  position: absolute;
+  bottom: 22px;
+  left: 22px;
+  z-index: 2;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text);
+  background: rgba(10, 6, 3, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 246, 236, 0.2);
+}
+
+.hero-frame-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  z-index: 2;
+}
+
+.hero-frame-corner.tl {
+  top: -12px;
+  left: -12px;
+  border-top: 2px solid var(--accent-2);
+  border-left: 2px solid var(--accent-2);
+}
+
+.hero-frame-corner.br {
+  bottom: -12px;
+  right: -12px;
+  border-bottom: 2px solid var(--accent-2);
+  border-right: 2px solid var(--accent-2);
+}
+
+/* ==================== BUTTONS (btn-fill: matn almashadi, fon to'ladi) ==================== */
+.btn-fill {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 18px 30px;
   border-radius: 999px;
-  background: #fff;
-  color: #050505;
+  border: 1.5px solid var(--text);
+  color: var(--text);
   font-weight: 700;
   font-size: 15px;
   white-space: nowrap;
-  transition: transform 0.15s ease;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.45s ease, transform 0.15s ease;
 }
 
-.magnetic-btn img {
-  width: 16px;
-  height: 16px;
+.btn-fill-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--gradient);
+  border-radius: inherit;
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.btn-fill:hover {
+  color: var(--bg);
+  border-color: transparent;
+}
+
+.btn-fill:hover .btn-fill-bg {
+  transform: scale(1.3);
+}
+
+.btn-fill-label {
+  position: relative;
+  display: inline-block;
+  height: 1.1em;
+  overflow: hidden;
+}
+
+.btn-fill-label span {
+  display: block;
+  height: 1.1em;
+  line-height: 1.1em;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-fill:hover .btn-fill-label span {
+  transform: translateY(-1.1em);
+}
+
+.btn-fill-icon {
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-fill:hover .btn-fill-icon {
+  transform: rotate(45deg);
+}
+
+.btn-fill-sm {
+  padding: 10px 18px;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.btn-fill-lg {
+  padding: 22px 38px;
+  font-size: 16px;
+  margin-bottom: 48px;
 }
 
 /* ==================== MARQUEE ==================== */
@@ -716,10 +877,6 @@ h1, h2, h3 {
   margin-bottom: 44px;
 }
 
-.cta-btn {
-  margin-bottom: 48px;
-}
-
 .cta-socials {
   display: flex;
   gap: 32px;
@@ -792,14 +949,21 @@ h1, h2, h3 {
     padding: 100px 6vw;
   }
 
-  .hero-media img {
-    object-position: 62% 8%;
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
 
-  .hero-media-overlay {
-    background:
-      linear-gradient(0deg, var(--bg) 0%, rgba(10, 6, 3, 0.6) 45%, rgba(10, 6, 3, 0.25) 70%),
-      linear-gradient(0deg, rgba(10, 6, 3, 0.9) 0%, rgba(10, 6, 3, 0.15) 55%);
+  .hero {
+    padding-top: 120px;
+    min-height: auto;
+  }
+
+  .hero-frame {
+    order: -1;
+    aspect-ratio: 4 / 3;
+    max-width: 360px;
+    margin: 0 auto;
   }
 }
 
@@ -810,11 +974,6 @@ h1, h2, h3 {
 
   .bento-lg {
     grid-column: span 1;
-  }
-
-  .hero-bottom {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .work-num {

@@ -2,15 +2,44 @@
 document.getElementById("year").textContent = new Date().getFullYear();
 
 // Sichqonchali qurilmami yoki yo'qmi — bir necha bo'limda ishlatiladi
-// (custom cursor, magnetic tugmalar, tilt effekt, hero parallaks)
+// (custom cursor, magnetic tugmalar, tilt effekt, hero freym tilt)
 const isFinePointer = window.matchMedia("(pointer: fine)").matches;
 
-// ===== LOADER =====
-window.addEventListener("load", function () {
-  setTimeout(function () {
-    document.getElementById("loader").classList.add("done");
-  }, 500);
-});
+// ===== LOADER: 0 -> 100% animatsiya =====
+const loaderNum = document.getElementById("loaderNum");
+const loaderBarFill = document.getElementById("loaderBarFill");
+const loader = document.getElementById("loader");
+
+(function runLoader() {
+  const duration = 1600;
+  const start = performance.now();
+
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const percent = Math.round(progress * 100);
+    loaderNum.textContent = percent;
+    loaderBarFill.style.width = percent + "%";
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      setTimeout(function () {
+        loader.classList.add("done");
+      }, 300);
+    }
+  }
+  requestAnimationFrame(tick);
+})();
+
+// ===== SCROLL PROGRESS BAR =====
+const scrollProgress = document.getElementById("scrollProgress");
+
+function updateScrollProgress() {
+  const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const percent = scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
+  scrollProgress.style.width = percent + "%";
+}
+
+window.addEventListener("scroll", updateScrollProgress);
 
 // ===== NAVBAR: scroll qilganda fon qo'shish =====
 const navbar = document.getElementById("navbar");
@@ -22,34 +51,29 @@ window.addEventListener("scroll", function () {
   }
 });
 
-// ===== HERO RASM PARALLAKS (sichqoncha + scroll birgalikda) =====
-const heroPhotoImg = document.getElementById("heroPhotoImg");
-let heroPanX = 0;
-let heroPanY = 0;
-let heroScrollY = 0;
+// ===== HERO FREYM: sichqoncha bilan yengil 3D tilt =====
+const heroFrame = document.getElementById("heroFrame");
 
-function applyHeroTransform() {
-  if (!heroPhotoImg) return;
-  heroPhotoImg.style.transform =
-    "scale(1.06) translate(" + heroPanX + "px, " + (heroPanY + heroScrollY) + "px)";
-}
+if (heroFrame && isFinePointer) {
+  heroFrame.addEventListener("mousemove", function (e) {
+    const rect = heroFrame.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const rotateX = ((y - rect.height / 2) / rect.height) * -10;
+    const rotateY = ((x - rect.width / 2) / rect.width) * 10;
+    heroFrame.style.transform =
+      "perspective(1000px) rotateX(" + rotateX + "deg) rotateY(" + (rotateY + 2) + "deg)";
+  });
 
-if (heroPhotoImg && isFinePointer) {
-  document.getElementById("heroMedia").addEventListener("mousemove", function (e) {
-    heroPanX = -(e.clientX / window.innerWidth - 0.5) * 24;
-    heroPanY = -(e.clientY / window.innerHeight - 0.5) * 24;
-    applyHeroTransform();
+  heroFrame.addEventListener("mouseleave", function () {
+    heroFrame.style.transform = "perspective(1000px) rotateX(0) rotateY(2deg)";
   });
 }
-
-window.addEventListener("scroll", function () {
-  heroScrollY = window.scrollY * 0.2;
-  applyHeroTransform();
-});
 
 // ===== CUSTOM CURSOR (faqat sichqoncha bo'lgan qurilmalarda) =====
 const cursorDot = document.getElementById("cursorDot");
 const cursorRing = document.getElementById("cursorRing");
+const cursorLabel = document.getElementById("cursorLabel");
 
 if (isFinePointer) {
   let ringX = 0, ringY = 0, mouseX = 0, mouseY = 0;
@@ -58,6 +82,7 @@ if (isFinePointer) {
     mouseX = e.clientX;
     mouseY = e.clientY;
     cursorDot.style.transform = "translate(" + mouseX + "px, " + mouseY + "px)";
+    cursorLabel.style.transform = "translate(" + mouseX + "px, " + mouseY + "px)";
   });
 
   function animateRing() {
@@ -69,24 +94,28 @@ if (isFinePointer) {
   }
   animateRing();
 
-  document.querySelectorAll("[data-hover]").forEach(function (el) {
+  function bindHoverCursor(el) {
     el.addEventListener("mouseenter", function () {
       cursorRing.classList.add("hovered");
     });
     el.addEventListener("mouseleave", function () {
       cursorRing.classList.remove("hovered");
     });
-  });
+  }
+
+  document.querySelectorAll("[data-hover]").forEach(bindHoverCursor);
+} else {
+  document.body.style.cursor = "auto";
 }
 
-// ===== MAGNETIC BUTTONS =====
+// ===== MAGNETIC BUTTONS (btn-fill) =====
 if (isFinePointer) {
-  document.querySelectorAll(".magnetic-btn").forEach(function (btn) {
+  document.querySelectorAll(".btn-fill").forEach(function (btn) {
     btn.addEventListener("mousemove", function (e) {
       const rect = btn.getBoundingClientRect();
       const relX = e.clientX - rect.left - rect.width / 2;
       const relY = e.clientY - rect.top - rect.height / 2;
-      btn.style.transform = "translate(" + relX * 0.3 + "px, " + relY * 0.3 + "px)";
+      btn.style.transform = "translate(" + relX * 0.25 + "px, " + relY * 0.25 + "px)";
     });
     btn.addEventListener("mouseleave", function () {
       btn.style.transform = "translate(0, 0)";
@@ -143,6 +172,25 @@ WORK_PROJECTS.forEach(function (project, index) {
   workList.appendChild(item);
 });
 
+// data-hover va "Ko'rish" kursor-label'ni dinamik qo'shilgan elementlarga ulash
+if (isFinePointer) {
+  document.querySelectorAll(".work-link").forEach(function (el) {
+    el.addEventListener("mouseenter", function () { cursorRing.classList.add("hovered"); });
+    el.addEventListener("mouseleave", function () { cursorRing.classList.remove("hovered"); });
+  });
+
+  document.querySelectorAll(".work-media").forEach(function (el) {
+    el.addEventListener("mouseenter", function () {
+      cursorLabel.classList.add("active");
+      cursorRing.classList.add("hidden-for-label");
+    });
+    el.addEventListener("mouseleave", function () {
+      cursorLabel.classList.remove("active");
+      cursorRing.classList.remove("hidden-for-label");
+    });
+  });
+}
+
 // ===== SCROLL'DA PAYDO BO'LISH (Intersection Observer) =====
 const revealObserver = new IntersectionObserver(function (entries) {
   entries.forEach(function (entry) {
@@ -156,18 +204,6 @@ const revealObserver = new IntersectionObserver(function (entries) {
 document.querySelectorAll(".reveal").forEach(function (el) {
   revealObserver.observe(el);
 });
-
-// data-hover elementlarga cursor hover qayta ulash (work-link'lar dinamik qo'shilgani uchun)
-if (isFinePointer) {
-  document.querySelectorAll("[data-hover]").forEach(function (el) {
-    el.addEventListener("mouseenter", function () {
-      cursorRing.classList.add("hovered");
-    });
-    el.addEventListener("mouseleave", function () {
-      cursorRing.classList.remove("hovered");
-    });
-  });
-}
 
 // ===== RAQAMLARNI SANASH ANIMATSIYASI (stats) =====
 const statObserver = new IntersectionObserver(function (entries) {

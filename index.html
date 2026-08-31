@@ -11,14 +11,22 @@
 </head>
 <body>
 
+  <!-- SCROLL PROGRESS -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
   <!-- LOADER -->
   <div class="loader" id="loader">
-    <span class="loader-text">XS</span>
+    <div class="loader-inner">
+      <span class="loader-num" id="loaderNum">0</span>
+      <div class="loader-bar"><div class="loader-bar-fill" id="loaderBarFill"></div></div>
+      <span class="loader-caption">Yuklanmoqda</span>
+    </div>
   </div>
 
   <!-- CUSTOM CURSOR -->
   <div class="cursor-dot" id="cursorDot"></div>
   <div class="cursor-ring" id="cursorRing"></div>
+  <div class="cursor-label" id="cursorLabel"><span>Ko'rish</span></div>
 
   <!-- NOISE OVERLAY -->
   <div class="noise"></div>
@@ -37,41 +45,58 @@
         <a href="#about" class="nav-link" data-hover>Skill</a>
         <a href="#contact" class="nav-link" data-hover>Aloqa</a>
       </nav>
-      <a href="#contact" class="nav-cta" data-hover>Hamkorlik <span>&rarr;</span></a>
+      <a href="#contact" class="btn-fill btn-fill-sm" data-hover>
+        <span class="btn-fill-bg"></span>
+        <span class="btn-fill-label">
+          <span>Hamkorlik</span>
+          <span>Hamkorlik</span>
+        </span>
+        <svg class="btn-fill-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+      </a>
     </div>
   </header>
 
   <!-- HERO -->
   <section class="hero" id="top">
-    <div class="hero-media" id="heroMedia">
-      <img src="assets/hero.jpg" alt="Xojiakbar Saydullayev" id="heroPhotoImg">
-      <div class="hero-media-overlay"></div>
-    </div>
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="hero-tag reveal">FRONTEND DEVELOPER — TOSHKENT</p>
 
-    <div class="hero-content">
-      <p class="hero-tag reveal">FRONTEND DEVELOPER — TOSHKENT</p>
+        <h1 class="hero-title">
+          <span class="line" data-hover>
+            <span class="word">G'oyalarni</span>
+          </span>
+          <span class="line" data-hover>
+            <span class="word grad-text">interfeysga</span>
+          </span>
+          <span class="line" data-hover>
+            <span class="word">aylantiraman.</span>
+          </span>
+        </h1>
 
-      <h1 class="hero-title">
-        <span class="line" data-hover>
-          <span class="word">G'oyalarni</span>
-        </span>
-        <span class="line" data-hover>
-          <span class="word grad-text">interfeysga</span>
-        </span>
-        <span class="line" data-hover>
-          <span class="word">aylantiraman.</span>
-        </span>
-      </h1>
+        <div class="hero-bottom reveal">
+          <p class="hero-desc">
+            HTML, CSS, JavaScript va React bilan chiroyli, tez va real
+            ishlaydigan veb-tajribalar yarataman. Har bir piksel o'z o'rnida.
+          </p>
+          <a href="#work" class="btn-fill" data-hover>
+            <span class="btn-fill-bg"></span>
+            <span class="btn-fill-label">
+              <span>Loyihalarni ko'rish</span>
+              <span>Loyihalarni ko'rish</span>
+            </span>
+            <svg class="btn-fill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+          </a>
+        </div>
+      </div>
 
-      <div class="hero-bottom reveal">
-        <p class="hero-desc">
-          HTML, CSS, JavaScript va React bilan chiroyli, tez va real
-          ishlaydigan veb-tajribalar yarataman. Har bir piksel o'z o'rnida.
-        </p>
-        <a href="#work" class="magnetic-btn" data-hover>
-          <span>Loyihalarni ko'rish</span>
-          <img src="https://api.iconify.design/mdi:arrow-bottom-right.svg?color=%230a0603" alt="">
-        </a>
+      <div class="hero-frame reveal" id="heroFrame">
+        <div class="hero-frame-photo">
+          <img src="assets/hero.jpg" alt="Xojiakbar Saydullayev" id="heroPhotoImg">
+        </div>
+        <span class="hero-frame-tag">XOJIAKBAR — DEV</span>
+        <span class="hero-frame-corner tl"></span>
+        <span class="hero-frame-corner br"></span>
       </div>
     </div>
   </section>
@@ -188,9 +213,13 @@
     <div class="cta-glow"></div>
     <p class="section-eyebrow reveal center">Keyingi qadam</p>
     <h2 class="cta-title reveal">Loyiha g'oyangiz bormi?<br><span class="grad-text">Kelib gaplashamiz.</span></h2>
-    <a href="mailto:xojiakbarsaydullaev13@gmail.com" class="magnetic-btn cta-btn reveal" data-hover>
-      <span>Menga yozing</span>
-      <img src="https://api.iconify.design/mdi:arrow-bottom-right.svg?color=%23050505" alt="">
+    <a href="mailto:xojiakbarsaydullaev13@gmail.com" class="btn-fill btn-fill-lg reveal" data-hover>
+      <span class="btn-fill-bg"></span>
+      <span class="btn-fill-label">
+        <span>Menga yozing</span>
+        <span>Menga yozing</span>
+      </span>
+      <svg class="btn-fill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
     </a>
 
     <div class="cta-socials reveal">
