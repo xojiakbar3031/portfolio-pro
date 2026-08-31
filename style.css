@@ -5,16 +5,16 @@
 }
 
 :root {
-  --bg: #050505;
-  --surface: #0d0d10;
-  --surface-2: #17171c;
-  --border: #26262e;
-  --text: #f5f5f7;
-  --text-dim: #8a8a95;
-  --accent-1: #ff2e88;
-  --accent-2: #7c3aed;
-  --accent-3: #22d3ee;
-  --gradient: linear-gradient(120deg, var(--accent-1), var(--accent-2) 55%, var(--accent-3));
+  --bg: #0a0603;
+  --surface: #150e08;
+  --surface-2: #201408;
+  --border: #3c2814;
+  --text: #fff6ec;
+  --text-dim: #c7a687;
+  --accent-1: #ff3b1f;
+  --accent-2: #ffb020;
+  --accent-3: #ff2f56;
+  --gradient: linear-gradient(120deg, var(--accent-3), var(--accent-1) 50%, var(--accent-2));
 }
 
 html {
@@ -218,7 +218,7 @@ h1, h2, h3 {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--accent-3);
+  color: var(--accent-2);
   margin-bottom: 14px;
 }
 
@@ -308,8 +308,38 @@ h1, h2, h3 {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 140px 8vw 60px;
+  justify-content: flex-end;
+  padding: 140px 8vw 100px;
+  overflow: hidden;
+}
+
+/* Fon rasm — katta, butun hero'ni egallaydi */
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 68% 12%;
+  transform: scale(1.06);
+  will-change: transform;
+}
+
+.hero-media-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, var(--bg) 0%, rgba(10, 6, 3, 0.55) 42%, rgba(10, 6, 3, 0.15) 65%),
+    linear-gradient(100deg, rgba(10, 6, 3, 0.96) 0%, rgba(10, 6, 3, 0.7) 32%, rgba(10, 6, 3, 0.05) 62%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-tag {
@@ -382,72 +412,6 @@ h1, h2, h3 {
 .magnetic-btn img {
   width: 16px;
   height: 16px;
-}
-
-.hero-avatar-orbit {
-  position: absolute;
-  right: 8vw;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 220px;
-  height: 220px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-photo {
-  width: 170px;
-  height: 170px;
-  border-radius: 50%;
-  background: var(--gradient);
-  background-size: 200% auto;
-  animation: gradShift 6s ease infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 56px;
-  font-weight: 700;
-  color: #fff;
-  object-fit: cover;
-  z-index: 2;
-  box-shadow: 0 30px 80px rgba(124, 58, 237, 0.4);
-}
-
-.hero-photo.has-image {
-  font-size: 0;
-}
-
-.hero-photo img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.hero-avatar-orbit::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 1.5px dashed var(--border);
-  border-radius: 50%;
-  animation: spin 24s linear infinite;
-}
-
-.hero-avatar-orbit::after {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent-3);
-  top: 0;
-  left: 50%;
-  margin-left: -6px;
-  box-shadow: 0 0 20px 4px var(--accent-3);
-  animation: spin 24s linear infinite;
-  transform-origin: 6px 110px;
 }
 
 @keyframes spin {
@@ -652,7 +616,7 @@ h1, h2, h3 {
   padding: 6px 14px;
   border-radius: 999px;
   background: var(--surface-2);
-  color: var(--accent-3);
+  color: var(--accent-2);
 }
 
 .work-links {
@@ -672,8 +636,8 @@ h1, h2, h3 {
 }
 
 .work-link:hover {
-  color: var(--accent-3);
-  border-color: var(--accent-3);
+  color: var(--accent-2);
+  border-color: var(--accent-2);
 }
 
 .work-link img {
@@ -800,11 +764,6 @@ h1, h2, h3 {
 }
 
 /* ==================== RESPONSIVE ==================== */
-@media (min-width: 1000px) {
-  .hero-avatar-orbit {
-    display: flex;
-  }
-}
 
 @media (max-width: 1000px) {
   .nav-menu {
@@ -831,6 +790,16 @@ h1, h2, h3 {
 
   .section {
     padding: 100px 6vw;
+  }
+
+  .hero-media img {
+    object-position: 62% 8%;
+  }
+
+  .hero-media-overlay {
+    background:
+      linear-gradient(0deg, var(--bg) 0%, rgba(10, 6, 3, 0.6) 45%, rgba(10, 6, 3, 0.25) 70%),
+      linear-gradient(0deg, rgba(10, 6, 3, 0.9) 0%, rgba(10, 6, 3, 0.15) 55%);
   }
 }
 

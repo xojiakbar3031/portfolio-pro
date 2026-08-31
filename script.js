@@ -1,6 +1,10 @@
 // ===== YIL =====
 document.getElementById("year").textContent = new Date().getFullYear();
 
+// Sichqonchali qurilmami yoki yo'qmi — bir necha bo'limda ishlatiladi
+// (custom cursor, magnetic tugmalar, tilt effekt, hero parallaks)
+const isFinePointer = window.matchMedia("(pointer: fine)").matches;
+
 // ===== LOADER =====
 window.addEventListener("load", function () {
   setTimeout(function () {
@@ -18,8 +22,32 @@ window.addEventListener("scroll", function () {
   }
 });
 
+// ===== HERO RASM PARALLAKS (sichqoncha + scroll birgalikda) =====
+const heroPhotoImg = document.getElementById("heroPhotoImg");
+let heroPanX = 0;
+let heroPanY = 0;
+let heroScrollY = 0;
+
+function applyHeroTransform() {
+  if (!heroPhotoImg) return;
+  heroPhotoImg.style.transform =
+    "scale(1.06) translate(" + heroPanX + "px, " + (heroPanY + heroScrollY) + "px)";
+}
+
+if (heroPhotoImg && isFinePointer) {
+  document.getElementById("heroMedia").addEventListener("mousemove", function (e) {
+    heroPanX = -(e.clientX / window.innerWidth - 0.5) * 24;
+    heroPanY = -(e.clientY / window.innerHeight - 0.5) * 24;
+    applyHeroTransform();
+  });
+}
+
+window.addEventListener("scroll", function () {
+  heroScrollY = window.scrollY * 0.2;
+  applyHeroTransform();
+});
+
 // ===== CUSTOM CURSOR (faqat sichqoncha bo'lgan qurilmalarda) =====
-const isFinePointer = window.matchMedia("(pointer: fine)").matches;
 const cursorDot = document.getElementById("cursorDot");
 const cursorRing = document.getElementById("cursorRing");
 
