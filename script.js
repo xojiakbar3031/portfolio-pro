@@ -177,6 +177,11 @@ function bindTilt(card) {
 document.querySelectorAll(".tilt").forEach(bindTilt);
 
 // ===== WORK RO'YXATINI RENDER QILISH =====
+// Ichki (inline) SVG ikonkalar — tashqi xizmatga bog'liq emas, currentColor
+// orqali kunduzgi/tungi rejimga avtomatik moslashadi.
+var SVG_EXTERNAL = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>';
+var SVG_GITHUB = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 1.5A10.5 10.5 0 0 0 8.7 22c.5.1.7-.2.7-.5v-1.7c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1.1-2.8-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.9 1.1a10 10 0 0 1 5.2 0c2-1.4 2.9-1.1 2.9-1.1.6 1.4.2 2.4.1 2.7.7.8 1.1 1.7 1.1 2.8 0 3.9-2.4 4.8-4.7 5.1.4.3.7 1 .7 2v3c0 .3.2.6.7.5A10.5 10.5 0 0 0 12 1.5z"></path></svg>';
+
 const workList = document.getElementById("workList");
 const revealObserver = new IntersectionObserver(function (entries) {
   entries.forEach(function (entry) {
@@ -213,9 +218,9 @@ function renderWork() {
         '<div class="work-tags">' + tagsHTML + '</div>' +
         '<div class="work-links">' +
           '<a href="' + project.demo + '" target="_blank" rel="noopener" class="work-link" data-hover>' +
-            '<img src="https://api.iconify.design/mdi:open-in-new.svg?color=%23ffffff" alt=""> ' + dict.workView + '</a>' +
+            SVG_EXTERNAL + ' ' + dict.workView + '</a>' +
           '<a href="' + project.code + '" target="_blank" rel="noopener" class="work-link" data-hover>' +
-            '<img src="https://api.iconify.design/mdi:github.svg?color=%23ffffff" alt=""> ' + dict.workCode + '</a>' +
+            SVG_GITHUB + ' ' + dict.workCode + '</a>' +
         '</div>' +
       '</div>';
 

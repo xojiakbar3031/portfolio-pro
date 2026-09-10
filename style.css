@@ -740,13 +740,20 @@ h1, h2, h3 {
 }
 
 .bento-icon {
-  width: 30px;
-  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
   margin-bottom: 20px;
-  padding: 10px;
   background: var(--surface-2);
   border-radius: 12px;
-  box-sizing: content-box;
+  color: var(--accent-2);
+}
+
+.bento-icon svg {
+  width: 26px;
+  height: 26px;
 }
 
 .bento-card h3 {
@@ -891,9 +898,11 @@ h1, h2, h3 {
   border-color: var(--accent-2);
 }
 
-.work-link img {
+.work-link img,
+.work-link svg {
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 }
 
 /* ==================== STATS ==================== */
@@ -1311,9 +1320,11 @@ h1, h2, h3 {
   border-color: var(--accent-2);
 }
 
-.modal-code-link img {
+.modal-code-link img,
+.modal-code-link svg {
   width: 15px;
   height: 15px;
+  flex-shrink: 0;
 }
 
 .work-media {
@@ -1344,6 +1355,5 @@ h1, h2, h3 {
 :root[data-theme="light"] .cursor-dot { background: #1c140c; }
 :root[data-theme="light"] .cursor-ring { border-color: rgba(28, 20, 12, 0.4); }
 :root[data-theme="light"] .modal-backdrop { background: rgba(60, 40, 20, 0.4); }
-:root[data-theme="light"] .bento-icon { filter: invert(1); }
-:root[data-theme="light"] .work-link img,
-:root[data-theme="light"] .modal-code-link img { filter: invert(1); }
+/* Ikonkalar endi inline SVG + currentColor — rejimga o'zi moslashadi,
+   invert() kerak emas. */
