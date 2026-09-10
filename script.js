@@ -30,6 +30,10 @@ function applyLang(lang) {
     var key = el.getAttribute("data-i18n-html");
     if (dict[key] != null) el.innerHTML = dict[key];
   });
+  document.querySelectorAll("[data-i18n-ph]").forEach(function (el) {
+    var key = el.getAttribute("data-i18n-ph");
+    if (dict[key] != null) el.setAttribute("placeholder", dict[key]);
+  });
 
   // til tugmalari holati
   document.querySelectorAll("#langSwitch button").forEach(function (b) {
@@ -286,6 +290,46 @@ document.addEventListener("keydown", function (e) {
   if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
 });
 
+// ===== YON SCROLL INDIKATORI (side-nav) =====
+var sideNav = document.getElementById("sideNav");
+var sideLinks = Array.prototype.slice.call(sideNav.querySelectorAll("a"));
+var sections = sideLinks.map(function (a) {
+  return document.querySelector(a.getAttribute("href") === "#top" ? "#top" : a.getAttribute("href"));
+});
+
+function updateSideNav() {
+  var pos = window.scrollY + window.innerHeight * 0.35;
+  var activeIdx = 0;
+  sections.forEach(function (sec, i) {
+    if (sec && sec.offsetTop <= pos) activeIdx = i;
+  });
+  sideLinks.forEach(function (a, i) {
+    a.classList.toggle("active", i === activeIdx);
+  });
+  // hero'dan pastga tushgach ko'rinadi
+  sideNav.classList.toggle("visible", window.scrollY > window.innerHeight * 0.5);
+}
+window.addEventListener("scroll", updateSideNav);
+sideLinks.forEach(function (a) { if (isFinePointer) window.bindHoverCursor(a); });
+
+// ===== JONLI GITHUB STATISTIKASI =====
+(function githubStats() {
+  var reposEl = document.getElementById("statRepos");
+  var projectsEl = document.getElementById("statProjects");
+  if (!reposEl) return;
+  fetch("https://api.github.com/users/xojiakbar3031")
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) {
+      if (data && typeof data.public_repos === "number") {
+        reposEl.setAttribute("data-count", String(data.public_repos));
+        if (projectsEl) projectsEl.setAttribute("data-count", String(Math.max(7, data.public_repos)));
+        // agar stats allaqachon ko'rinib bo'lgan bo'lsa, darrov yangilaymiz
+        if (reposEl.textContent !== "0") reposEl.textContent = String(data.public_repos);
+      }
+    })
+    .catch(function () { /* jonli ma'lumot bo'lmasa, statik raqamlar qoladi */ });
+})();
+
 // ===== RAQAMLARNI SANASH ANIMATSIYASI (stats) =====
 const statObserver = new IntersectionObserver(function (entries) {
   entries.forEach(function (entry) {
@@ -325,4 +369,11 @@ const statObserver = new IntersectionObserver(function (entries) {
   // statik "reveal" elementlarni kuzatish
   document.querySelectorAll(".reveal").forEach(function (el) { revealObserver.observe(el); });
   document.querySelectorAll(".stat-num").forEach(function (el) { statObserver.observe(el); });
+
+  // yangi elementlarga hover-kursor
+  if (isFinePointer) {
+    document.querySelectorAll(".btn-ghost, .contact-form input, .contact-form textarea").forEach(window.bindHoverCursor);
+  }
+
+  updateSideNav();
 })();

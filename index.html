@@ -54,6 +54,15 @@
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
 
+  <!-- YON SCROLL INDIKATORI -->
+  <nav class="side-nav" id="sideNav" aria-label="Section navigation">
+    <a href="#top" data-label="Home" class="active"></a>
+    <a href="#about" data-label="About"></a>
+    <a href="#work" data-label="Work"></a>
+    <a href="#process" data-label="Process"></a>
+    <a href="#contact" data-label="Contact"></a>
+  </nav>
+
   <!-- NAVBAR -->
   <header class="navbar" id="navbar">
     <div class="navbar-inner">
@@ -89,6 +98,7 @@
   <section class="hero" id="top">
     <div class="hero-grid">
       <div class="hero-text">
+        <span class="avail-badge reveal"><span class="avail-dot"></span><span data-i18n="availText">Freelance ish uchun ochiqman</span></span>
         <p class="hero-tag reveal" data-i18n="heroTag">FRONTEND DEVELOPER — ANGREN, O'ZBEKISTON</p>
 
         <h1 class="hero-title" id="heroTitle">
@@ -102,14 +112,20 @@
             HTML, CSS, JavaScript va React bilan chiroyli, tez va real
             ishlaydigan veb-tajribalar yarataman. Har bir piksel o'z o'rnida.
           </p>
-          <a href="#work" class="btn-fill" data-hover>
-            <span class="btn-fill-bg"></span>
-            <span class="btn-fill-label">
-              <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
-              <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
-            </span>
-            <svg class="btn-fill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-          </a>
+          <div class="hero-actions">
+            <a href="#work" class="btn-fill" data-hover>
+              <span class="btn-fill-bg"></span>
+              <span class="btn-fill-label">
+                <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
+                <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
+              </span>
+              <svg class="btn-fill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </a>
+            <a href="assets/Xojiakbar-Saydullayev-CV.pdf" download class="btn-ghost" data-hover>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="cvBtn">CV yuklab olish</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -231,15 +247,45 @@
     <div class="work-list" id="workList"></div>
   </section>
 
+  <!-- PROCESS -->
+  <section class="section process-section" id="process">
+    <div class="section-head">
+      <p class="section-eyebrow reveal" data-i18n="procEyebrow">Qanday ishlayman</p>
+      <h2 class="section-title reveal" data-i18n-html="procTitle">G'oyadan <span class="grad-text">jonli saytgacha</span> — 4 qadam.</h2>
+    </div>
+    <div class="process-grid">
+      <div class="proc-step reveal">
+        <span class="proc-num">01</span>
+        <h3 data-i18n="proc1Title">Gaplashamiz</h3>
+        <p data-i18n="proc1Text">Sizga nima kerakligini, maqsad va muddatni aniqlaymiz. Ortiqcha texnik atamalarsiz.</p>
+      </div>
+      <div class="proc-step reveal">
+        <span class="proc-num">02</span>
+        <h3 data-i18n="proc2Title">Dizayn</h3>
+        <p data-i18n="proc2Text">Sahifa tuzilishi va ko'rinishini kelishib olamiz — kod yozishdan oldin.</p>
+      </div>
+      <div class="proc-step reveal">
+        <span class="proc-num">03</span>
+        <h3 data-i18n="proc3Title">Kod</h3>
+        <p data-i18n="proc3Text">Toza, tez va responsive kod. Har bosqichda ko'rsatib boraman.</p>
+      </div>
+      <div class="proc-step reveal">
+        <span class="proc-num">04</span>
+        <h3 data-i18n="proc4Title">Deploy</h3>
+        <p data-i18n="proc4Text">Sayt jonli domenga chiqadi, ishlashini tekshiraman va sizga topshiraman.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- STATS -->
   <section class="section stats-section">
     <div class="stats-grid">
       <div class="stat reveal">
-        <span class="stat-num" data-count="7">0</span><span class="stat-plus grad-text">+</span>
+        <span class="stat-num" data-count="7" id="statProjects">0</span><span class="stat-plus grad-text">+</span>
         <p data-i18n="stat1">Tugallangan loyiha</p>
       </div>
       <div class="stat reveal">
-        <span class="stat-num" data-count="6">0</span>
+        <span class="stat-num" data-count="6" id="statRepos">0</span>
         <p data-i18n="stat2">Ochiq manba repo</p>
       </div>
       <div class="stat reveal">
@@ -251,21 +297,43 @@
         <p data-i18n="stat4">Real mijoz loyihasi</p>
       </div>
     </div>
+    <p class="stats-note" id="statsNote" data-i18n="statsNote">Repo soni GitHub'dan jonli olinadi</p>
   </section>
 
-  <!-- CTA -->
+  <!-- CTA + CONTACT FORM -->
   <section class="cta-section" id="contact">
     <div class="cta-glow"></div>
     <p class="section-eyebrow reveal center" data-i18n="ctaEyebrow">Keyingi qadam</p>
     <h2 class="cta-title reveal" data-i18n-html="ctaTitle">Loyiha g'oyangiz bormi?<br><span class="grad-text">Kelib gaplashamiz.</span></h2>
-    <a href="mailto:xojiakbarsaydullaev13@gmail.com" class="btn-fill btn-fill-lg reveal" data-hover>
-      <span class="btn-fill-bg"></span>
-      <span class="btn-fill-label">
-        <span data-i18n="ctaBtn">Menga yozing</span>
-        <span data-i18n="ctaBtn">Menga yozing</span>
-      </span>
-      <svg class="btn-fill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-    </a>
+
+    <form class="contact-form reveal" id="contactForm" action="https://formsubmit.co/xojiakbarsaydullaev13@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="Portfolio-pro: yangi murojaat">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <div class="cf-row">
+        <label>
+          <span data-i18n="cfName">Ismingiz</span>
+          <input type="text" name="name" required minlength="2" maxlength="80" data-i18n-ph="cfNamePh" placeholder="Ismingiz">
+        </label>
+        <label>
+          <span data-i18n="cfEmail">Email yoki Telegram</span>
+          <input type="text" name="contact" required maxlength="120" data-i18n-ph="cfEmailPh" placeholder="siz@example.com / @username">
+        </label>
+      </div>
+      <label>
+        <span data-i18n="cfMsg">Xabar</span>
+        <textarea name="message" required minlength="5" maxlength="1500" rows="4" data-i18n-ph="cfMsgPh" placeholder="Loyihangiz haqida qisqacha..."></textarea>
+      </label>
+      <button type="submit" class="btn-fill btn-fill-lg" data-hover>
+        <span class="btn-fill-bg"></span>
+        <span class="btn-fill-label">
+          <span data-i18n="cfSend">Yuborish</span>
+          <span data-i18n="cfSend">Yuborish</span>
+        </span>
+        <svg class="btn-fill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+      </button>
+      <p class="cf-alt" data-i18n-html="cfAlt">yoki to'g'ridan-to'g'ri: <a href="mailto:xojiakbarsaydullaev13@gmail.com">xojiakbarsaydullaev13@gmail.com</a></p>
+    </form>
 
     <div class="cta-socials reveal">
       <a href="https://github.com/xojiakbar3031" target="_blank" rel="noopener" data-hover>GitHub</a>

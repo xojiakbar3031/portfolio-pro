@@ -1357,3 +1357,264 @@ h1, h2, h3 {
 :root[data-theme="light"] .modal-backdrop { background: rgba(60, 40, 20, 0.4); }
 /* Ikonkalar endi inline SVG + currentColor — rejimga o'zi moslashadi,
    invert() kerak emas. */
+
+/* ==================== AVAILABILITY BADGE ==================== */
+.avail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 15px 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.avail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  animation: pulseDot 2s ease-out infinite;
+}
+
+@keyframes pulseDot {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* ==================== HERO ACTIONS + GHOST BUTTON ==================== */
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 17px 26px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 14px;
+  transition: border-color 0.25s ease, color 0.25s ease, transform 0.15s ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  transform: translateY(-2px);
+}
+
+/* ==================== PROCESS SECTION ==================== */
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.proc-step {
+  padding: 30px 26px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.proc-step:hover {
+  border-color: var(--accent-2);
+  transform: translateY(-6px);
+}
+
+.proc-num {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-2);
+  letter-spacing: 1px;
+}
+
+.proc-step h3 {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 16px 0 10px;
+}
+
+.proc-step p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+/* ==================== STATS NOTE ==================== */
+.stats-note {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 12px;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* ==================== CONTACT FORM ==================== */
+.contact-form {
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.cf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.contact-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.contact-form input,
+.contact-form textarea {
+  font-family: "Manrope", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 0.55;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(255, 176, 32, 0.14);
+}
+
+.contact-form .btn-fill {
+  justify-content: center;
+  border: 0;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.contact-form .btn-fill .btn-fill-bg { transform: scale(1); }
+.contact-form .btn-fill:hover .btn-fill-bg { transform: scale(1.3); }
+
+.cf-alt {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.cf-alt a {
+  color: var(--accent-2);
+  border-bottom: 1px solid currentColor;
+}
+
+/* ==================== SIDE NAV (scroll indikatori) ==================== */
+.side-nav {
+  position: fixed;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.side-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-nav a {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-dim);
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.side-nav a.active {
+  background: var(--accent-1);
+  border-color: var(--accent-1);
+  transform: scale(1.3);
+}
+
+.side-nav a::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.side-nav a:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 1100px) {
+  .side-nav { display: none; }
+}
+
+@media (max-width: 900px) {
+  .process-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .process-grid { grid-template-columns: 1fr; }
+  .cf-row { grid-template-columns: 1fr; }
+  .hero-actions { width: 100%; }
+  .hero-actions .btn-fill,
+  .hero-actions .btn-ghost { flex: 1; justify-content: center; }
+}
