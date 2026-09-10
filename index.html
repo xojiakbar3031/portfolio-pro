@@ -1,11 +1,29 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Xojiakbar Saydullayev — Creative Frontend Developer</title>
-  <meta name="description" content="Xojiakbar Saydullayev — g'oyalarni interfeysga aylantiruvchi frontend dasturchi.">
+  <meta name="description" content="Xojiakbar Saydullayev — g'oyalarni tez, chiroyli va real ishlaydigan interfeysga aylantiruvchi frontend dasturchi. React, JavaScript, REST API.">
+
+  <!-- Ijtimoiy tarmoq ko'rinishi (Open Graph / Twitter) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://xojiakbar3031.github.io/portfolio-pro/">
+  <meta property="og:title" content="Xojiakbar Saydullayev — Creative Frontend Developer">
+  <meta property="og:description" content="G'oyalarni tez, chiroyli va real ishlaydigan interfeysga aylantiruvchi frontend dasturchi.">
+  <meta property="og:image" content="https://xojiakbar3031.github.io/portfolio-pro/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Xojiakbar Saydullayev — Creative Frontend Developer">
+  <meta name="twitter:description" content="G'oyalarni tez, chiroyli va real ishlaydigan interfeysga aylantiruvchi frontend dasturchi.">
+  <meta name="twitter:image" content="https://xojiakbar3031.github.io/portfolio-pro/assets/og-image.jpg">
+
+  <!-- Favicon (XS monogrammasi, SVG) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0603'/%3E%3Ctext x='50%25' y='53%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Arial, sans-serif' font-size='30' font-weight='700' fill='%23ff6a1f'%3EXS%3C/text%3E%3C/svg%3E">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -19,14 +37,14 @@
     <div class="loader-inner">
       <span class="loader-num" id="loaderNum">0</span>
       <div class="loader-bar"><div class="loader-bar-fill" id="loaderBarFill"></div></div>
-      <span class="loader-caption">Yuklanmoqda</span>
+      <span class="loader-caption" data-i18n="loader">Yuklanmoqda</span>
     </div>
   </div>
 
   <!-- CUSTOM CURSOR -->
   <div class="cursor-dot" id="cursorDot"></div>
   <div class="cursor-ring" id="cursorRing"></div>
-  <div class="cursor-label" id="cursorLabel"><span>Ko'rish</span></div>
+  <div class="cursor-label" id="cursorLabel"><span data-i18n="cursorView">Ko'rish</span></div>
 
   <!-- NOISE OVERLAY -->
   <div class="noise"></div>
@@ -41,18 +59,29 @@
     <div class="navbar-inner">
       <a href="#top" class="logo" data-hover>XS<span>.</span></a>
       <nav class="nav-menu">
-        <a href="#work" class="nav-link" data-hover>Loyihalar</a>
-        <a href="#about" class="nav-link" data-hover>Skill</a>
-        <a href="#contact" class="nav-link" data-hover>Aloqa</a>
+        <a href="#work" class="nav-link" data-hover data-i18n="navWork">Loyihalar</a>
+        <a href="#about" class="nav-link" data-hover data-i18n="navAbout">Men haqimda</a>
+        <a href="#contact" class="nav-link" data-hover data-i18n="navContact">Aloqa</a>
       </nav>
-      <a href="#contact" class="btn-fill btn-fill-sm" data-hover>
-        <span class="btn-fill-bg"></span>
-        <span class="btn-fill-label">
-          <span>Hamkorlik</span>
-          <span>Hamkorlik</span>
-        </span>
-        <svg class="btn-fill-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-      </a>
+      <div class="nav-tools">
+        <div class="lang-switch" id="langSwitch">
+          <button data-lang="uz" class="active">UZ</button>
+          <button data-lang="ru">RU</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="theme-toggle" id="themeToggle" data-hover aria-label="Theme">
+          <svg class="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+          <svg class="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+        </button>
+        <a href="#contact" class="btn-fill btn-fill-sm" data-hover>
+          <span class="btn-fill-bg"></span>
+          <span class="btn-fill-label">
+            <span data-i18n="navHire">Hamkorlik</span>
+            <span data-i18n="navHire">Hamkorlik</span>
+          </span>
+          <svg class="btn-fill-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -60,30 +89,24 @@
   <section class="hero" id="top">
     <div class="hero-grid">
       <div class="hero-text">
-        <p class="hero-tag reveal">FRONTEND DEVELOPER — TOSHKENT</p>
+        <p class="hero-tag reveal" data-i18n="heroTag">FRONTEND DEVELOPER — ANGREN, O'ZBEKISTON</p>
 
-        <h1 class="hero-title">
-          <span class="line" data-hover>
-            <span class="word">G'oyalarni</span>
-          </span>
-          <span class="line" data-hover>
-            <span class="word grad-text">interfeysga</span>
-          </span>
-          <span class="line" data-hover>
-            <span class="word">aylantiraman.</span>
-          </span>
+        <h1 class="hero-title" id="heroTitle">
+          <span class="line" data-hover><span class="word" data-i18n="heroLine1">G'oyalarni</span></span>
+          <span class="line" data-hover><span class="word grad-text" data-i18n="heroLine2">interfeysga</span></span>
+          <span class="line" data-hover><span class="word" data-i18n="heroLine3">aylantiraman.</span></span>
         </h1>
 
         <div class="hero-bottom reveal">
-          <p class="hero-desc">
+          <p class="hero-desc" data-i18n="heroDesc">
             HTML, CSS, JavaScript va React bilan chiroyli, tez va real
             ishlaydigan veb-tajribalar yarataman. Har bir piksel o'z o'rnida.
           </p>
           <a href="#work" class="btn-fill" data-hover>
             <span class="btn-fill-bg"></span>
             <span class="btn-fill-label">
-              <span>Loyihalarni ko'rish</span>
-              <span>Loyihalarni ko'rish</span>
+              <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
+              <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
             </span>
             <svg class="btn-fill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
           </a>
@@ -105,73 +128,95 @@
   <div class="marquee-wrap">
     <div class="marquee">
       <div class="marquee-track">
-        <span>FRONTEND DEVELOPMENT</span>
-        <span class="dot">•</span>
-        <span>REACT</span>
-        <span class="dot">•</span>
-        <span>JAVASCRIPT</span>
-        <span class="dot">•</span>
-        <span>UI / UX</span>
-        <span class="dot">•</span>
-        <span>CREATIVE CODE</span>
-        <span class="dot">•</span>
-        <span>REST API</span>
-        <span class="dot">•</span>
+        <span>FRONTEND DEVELOPMENT</span><span class="dot">•</span><span>REACT</span><span class="dot">•</span><span>JAVASCRIPT</span><span class="dot">•</span><span>UI / UX</span><span class="dot">•</span><span>CREATIVE CODE</span><span class="dot">•</span><span>REST API</span><span class="dot">•</span>
       </div>
       <div class="marquee-track" aria-hidden="true">
-        <span>FRONTEND DEVELOPMENT</span>
-        <span class="dot">•</span>
-        <span>REACT</span>
-        <span class="dot">•</span>
-        <span>JAVASCRIPT</span>
-        <span class="dot">•</span>
-        <span>UI / UX</span>
-        <span class="dot">•</span>
-        <span>CREATIVE CODE</span>
-        <span class="dot">•</span>
-        <span>REST API</span>
-        <span class="dot">•</span>
+        <span>FRONTEND DEVELOPMENT</span><span class="dot">•</span><span>REACT</span><span class="dot">•</span><span>JAVASCRIPT</span><span class="dot">•</span><span>UI / UX</span><span class="dot">•</span><span>CREATIVE CODE</span><span class="dot">•</span><span>REST API</span><span class="dot">•</span>
       </div>
     </div>
   </div>
 
-  <!-- BENTO / SKILLS -->
-  <section class="section" id="about">
+  <!-- ABOUT -->
+  <section class="section about-section" id="about">
     <div class="section-head">
-      <p class="section-eyebrow reveal">Nima qila olaman</p>
-      <h2 class="section-title reveal">Bitta qo'l bilan <span class="grad-text">dizayn</span>, ikkinchisi bilan <span class="grad-text">kod</span>.</h2>
+      <p class="section-eyebrow reveal" data-i18n="aboutEyebrow">Men haqimda</p>
+      <h2 class="section-title reveal" data-i18n-html="aboutTitle">Bitta qo'l bilan <span class="grad-text">dizayn</span>, ikkinchisi bilan <span class="grad-text">kod</span>.</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-photo reveal">
+        <img src="assets/hero.jpg" alt="Xojiakbar Saydullayev">
+      </div>
+      <div class="about-text">
+        <p class="about-lead reveal" data-i18n="aboutLead">
+          Men Xojiakbar — Angrenda yashaydigan frontend dasturchiman. Frontend
+          kursini tamomlab, HTML/CSS/JavaScript'dan React'gacha o'rgandim va
+          o'rganganlarimni darrov real loyihalarga tatbiq qildim.
+        </p>
+        <p class="about-body reveal" data-i18n="aboutBody">
+          Eng katta ishim — Angren shahar 4-son Texnikumining rasmiy sayti:
+          uch tilli (UZ/RU/EN), onlayn qabul tizimi, to'liq admin panel va
+          Telegram bildirishnomalari bilan. Hozir u haqiqiy mijoz uchun VPS
+          serverda ishlab turibdi. Bundan tashqari, API integratsiyasi va
+          interaktiv interfeyslar bo'yicha bir nechta amaliy loyiha qildim.
+        </p>
+
+        <div class="timeline reveal">
+          <div class="tl-item">
+            <span class="tl-year">2025</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl1Title">Frontend kursi</h4>
+              <p data-i18n="tl1Text">HTML, CSS, JavaScript va React asoslarini noldan o'rgandim.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">2026</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl2Title">Amaliy loyihalar</h4>
+              <p data-i18n="tl2Text">YouTube Clone, StreamVibe, Pokemon va Animal — real API'lar bilan ishlaydigan loyihalar.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">2026</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl3Title">Birinchi real mijoz</h4>
+              <p data-i18n="tl3Text">Angren 4-son Texnikumi sayti — to'liq loyihani noldan qurib, VPS serverga joyladim.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="bento-grid">
       <div class="bento-card bento-lg tilt reveal">
         <img src="https://api.iconify.design/mdi:react.svg?color=%23ffffff" alt="" class="bento-icon">
-        <h3>Interaktiv interfeyslar</h3>
-        <p>React va vanilla JavaScript bilan tez, silliq va real funksiyalarga ega ilovalar quraman — statik maketlar emas.</p>
+        <h3 data-i18n="skill1Title">Interaktiv interfeyslar</h3>
+        <p data-i18n="skill1Text">React va vanilla JavaScript bilan tez, silliq va real funksiyalarga ega ilovalar quraman — statik maketlar emas.</p>
       </div>
       <div class="bento-card tilt reveal">
         <img src="https://api.iconify.design/mdi:api.svg?color=%23ffffff" alt="" class="bento-icon">
-        <h3>API integratsiya</h3>
-        <p>Real ma'lumotlarni tashqi API'lardan ulash va ekranga chiqarish.</p>
+        <h3 data-i18n="skill2Title">API integratsiya</h3>
+        <p data-i18n="skill2Text">Real ma'lumotlarni tashqi API'lardan ulash va ekranga chiqarish.</p>
       </div>
       <div class="bento-card tilt reveal">
         <img src="https://api.iconify.design/mdi:cellphone-link.svg?color=%23ffffff" alt="" class="bento-icon">
-        <h3>Responsive dizayn</h3>
-        <p>Telefon, planshet, kompyuter — har qanday ekranda bir xil sifat.</p>
+        <h3 data-i18n="skill3Title">Responsive dizayn</h3>
+        <p data-i18n="skill3Text">Telefon, planshet, kompyuter — har qanday ekranda bir xil sifat.</p>
       </div>
       <div class="bento-card bento-lg tilt reveal">
         <img src="https://api.iconify.design/mdi:lightning-bolt.svg?color=%23ffffff" alt="" class="bento-icon">
-        <h3>Animatsiya va mikro-interaksiyalar</h3>
-        <p>Sahifani "jonlantiradigan" kichik detallar — scroll animatsiyalari, hover effektlari, silliq o'tishlar. Aynan shu narsalar oddiy saytni esda qoladigan tajribaga aylantiradi.</p>
+        <h3 data-i18n="skill4Title">Animatsiya va mikro-interaksiyalar</h3>
+        <p data-i18n="skill4Text">Sahifani "jonlantiradigan" kichik detallar — scroll animatsiyalari, hover effektlari, silliq o'tishlar. Aynan shu narsalar oddiy saytni esda qoladigan tajribaga aylantiradi.</p>
       </div>
       <div class="bento-card tilt reveal">
         <img src="https://api.iconify.design/mdi:database-outline.svg?color=%23ffffff" alt="" class="bento-icon">
-        <h3>Ma'lumot saqlash</h3>
-        <p>localStorage bilan foydalanuvchi holatini saqlash.</p>
+        <h3 data-i18n="skill5Title">Ma'lumot saqlash</h3>
+        <p data-i18n="skill5Text">localStorage bilan foydalanuvchi holatini saqlash.</p>
       </div>
       <div class="bento-card tilt reveal">
         <img src="https://api.iconify.design/mdi:rocket-launch-outline.svg?color=%23ffffff" alt="" class="bento-icon">
-        <h3>Tezkor yetkazish</h3>
-        <p>G'oyadan tayyor, deploy qilingan saytgacha — qisqa muddatda.</p>
+        <h3 data-i18n="skill6Title">Tezkor yetkazish</h3>
+        <p data-i18n="skill6Text">G'oyadan tayyor, deploy qilingan saytgacha — qisqa muddatda.</p>
       </div>
     </div>
   </section>
@@ -179,8 +224,8 @@
   <!-- WORK -->
   <section class="section work-section" id="work">
     <div class="section-head">
-      <p class="section-eyebrow reveal">Tanlangan ishlar</p>
-      <h2 class="section-title reveal">Loyihalar <span class="grad-text">galereyasi</span></h2>
+      <p class="section-eyebrow reveal" data-i18n="workEyebrow">Tanlangan ishlar</p>
+      <h2 class="section-title reveal" data-i18n-html="workTitle">Loyihalar <span class="grad-text">galereyasi</span></h2>
     </div>
 
     <div class="work-list" id="workList"></div>
@@ -191,19 +236,19 @@
     <div class="stats-grid">
       <div class="stat reveal">
         <span class="stat-num" data-count="7">0</span><span class="stat-plus grad-text">+</span>
-        <p>Tugallangan loyiha</p>
+        <p data-i18n="stat1">Tugallangan loyiha</p>
       </div>
       <div class="stat reveal">
         <span class="stat-num" data-count="6">0</span>
-        <p>Ochiq manba repo</p>
+        <p data-i18n="stat2">Ochiq manba repo</p>
       </div>
       <div class="stat reveal">
         <span class="stat-num" data-count="3">0</span>
-        <p>Real API integratsiya</p>
+        <p data-i18n="stat3">Real API integratsiya</p>
       </div>
       <div class="stat reveal">
-        <span class="stat-num" data-count="100">0</span><span class="stat-plus grad-text">%</span>
-        <p>Detallarga e'tibor</p>
+        <span class="stat-num" data-count="1">0</span>
+        <p data-i18n="stat4">Real mijoz loyihasi</p>
       </div>
     </div>
   </section>
@@ -211,13 +256,13 @@
   <!-- CTA -->
   <section class="cta-section" id="contact">
     <div class="cta-glow"></div>
-    <p class="section-eyebrow reveal center">Keyingi qadam</p>
-    <h2 class="cta-title reveal">Loyiha g'oyangiz bormi?<br><span class="grad-text">Kelib gaplashamiz.</span></h2>
+    <p class="section-eyebrow reveal center" data-i18n="ctaEyebrow">Keyingi qadam</p>
+    <h2 class="cta-title reveal" data-i18n-html="ctaTitle">Loyiha g'oyangiz bormi?<br><span class="grad-text">Kelib gaplashamiz.</span></h2>
     <a href="mailto:xojiakbarsaydullaev13@gmail.com" class="btn-fill btn-fill-lg reveal" data-hover>
       <span class="btn-fill-bg"></span>
       <span class="btn-fill-label">
-        <span>Menga yozing</span>
-        <span>Menga yozing</span>
+        <span data-i18n="ctaBtn">Menga yozing</span>
+        <span data-i18n="ctaBtn">Menga yozing</span>
       </span>
       <svg class="btn-fill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
     </a>
@@ -231,9 +276,36 @@
 
   <footer class="footer">
     <p>&copy; <span id="year"></span> Xojiakbar Saydullayev</p>
-    <a href="#top" class="footer-top" data-hover>Tepaga &uarr;</a>
+    <a href="#top" class="footer-top" data-hover data-i18n="footerTop">Tepaga &uarr;</a>
   </footer>
 
+  <!-- PROJECT MODAL -->
+  <div class="modal" id="projectModal" aria-hidden="true">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" data-hover aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
+      </button>
+      <div class="modal-media"><img id="modalImg" src="" alt=""></div>
+      <div class="modal-body">
+        <p class="modal-year" id="modalYear"></p>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-tags" id="modalTags"></div>
+        <div class="modal-links">
+          <a href="#" target="_blank" rel="noopener" class="btn-fill btn-fill-sm" id="modalDemo" data-hover>
+            <span class="btn-fill-bg"></span>
+            <span class="btn-fill-label"><span data-i18n="modalDemo">Saytni ochish</span><span data-i18n="modalDemo">Saytni ochish</span></span>
+          </a>
+          <a href="#" target="_blank" rel="noopener" class="modal-code-link" id="modalCode" data-hover>
+            <img src="https://api.iconify.design/mdi:github.svg?color=%23ffffff" alt=""> <span data-i18n="modalCode">Kod (GitHub)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
   <script src="projects.js"></script>
   <script src="script.js"></script>
 </body>

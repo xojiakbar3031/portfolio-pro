@@ -4,7 +4,8 @@
   box-sizing: border-box;
 }
 
-:root {
+:root,
+:root[data-theme="dark"] {
   --bg: #0a0603;
   --surface: #150e08;
   --surface-2: #201408;
@@ -15,6 +16,27 @@
   --accent-2: #ffb020;
   --accent-3: #ff2f56;
   --gradient: linear-gradient(120deg, var(--accent-3), var(--accent-1) 50%, var(--accent-2));
+  --navbar-scrolled: rgba(5, 5, 5, 0.7);
+  --shadow-strong: rgba(0, 0, 0, 0.7);
+}
+
+:root[data-theme="light"] {
+  --bg: #fbf6ef;
+  --surface: #ffffff;
+  --surface-2: #f4ece0;
+  --border: #e6d9c6;
+  --text: #1c140c;
+  --text-dim: #7a6553;
+  --accent-1: #e5341a;
+  --accent-2: #d98b12;
+  --accent-3: #e02649;
+  --gradient: linear-gradient(120deg, var(--accent-3), var(--accent-1) 50%, var(--accent-2));
+  --navbar-scrolled: rgba(251, 246, 239, 0.8);
+  --shadow-strong: rgba(90, 60, 30, 0.22);
+}
+
+body {
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
 html {
@@ -325,10 +347,78 @@ h1, h2, h3 {
 }
 
 .navbar.scrolled {
-  background: rgba(5, 5, 5, 0.7);
+  background: var(--navbar-scrolled);
   backdrop-filter: blur(14px);
   padding: 18px 8vw;
   border-bottom-color: var(--border);
+}
+
+/* ==================== NAV TOOLS (til + mavzu) ==================== */
+.nav-tools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lang-switch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.lang-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lang-switch button.active {
+  color: var(--bg);
+  background: var(--text);
+}
+
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent-2);
+  transform: rotate(15deg);
+}
+
+:root[data-theme="light"] .theme-toggle .ico-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .ico-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .ico-sun,
+:root:not([data-theme="light"]) .theme-toggle .ico-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .ico-moon,
+:root:not([data-theme="light"]) .theme-toggle .ico-moon { display: block; }
+
+@media (max-width: 1000px) {
+  .nav-tools .btn-fill-sm { display: none; }
+}
+@media (max-width: 520px) {
+  .lang-switch button { padding: 5px 8px; font-size: 11px; }
+  .theme-toggle { width: 34px; height: 34px; }
 }
 
 .navbar-inner {
@@ -443,7 +533,7 @@ h1, h2, h3 {
   border-radius: 28px;
   overflow: hidden;
   background: var(--surface);
-  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 40px 100px -20px var(--shadow-strong);
 }
 
 .hero-frame-photo img {
@@ -989,3 +1079,271 @@ h1, h2, h3 {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ==================== ABOUT SECTION ==================== */
+.about-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 56px;
+  align-items: start;
+  margin-bottom: 90px;
+}
+
+.about-photo {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--border);
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  filter: saturate(1.05);
+}
+
+.about-lead {
+  font-size: 19px;
+  line-height: 1.6;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.about-body {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-dim);
+  margin-bottom: 40px;
+  max-width: 620px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 2px solid var(--border);
+  padding-left: 26px;
+}
+
+.tl-item {
+  position: relative;
+  padding: 16px 0;
+}
+
+.tl-item::before {
+  content: "";
+  position: absolute;
+  left: -33px;
+  top: 22px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 3px solid var(--accent-1);
+}
+
+.tl-year {
+  display: inline-block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent-2);
+  margin-bottom: 6px;
+}
+
+.tl-body h4 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tl-body p {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ==================== PROJECT MODAL ==================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 3, 1, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(880px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.open .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(10, 6, 3, 0.55);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--accent-1);
+  transform: rotate(90deg);
+}
+
+.modal-media {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+  background: var(--surface-2);
+}
+
+.modal-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-body {
+  padding: 32px 36px 36px;
+}
+
+.modal-year {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.modal-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+}
+
+.modal-desc {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.modal-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.modal-tags .tag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--accent-2);
+}
+
+.modal-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.modal-code-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 1px solid var(--text);
+  padding-bottom: 2px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.modal-code-link:hover {
+  color: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.modal-code-link img {
+  width: 15px;
+  height: 15px;
+}
+
+.work-media {
+  cursor: pointer;
+}
+
+@media (max-width: 1000px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .about-photo {
+    max-width: 320px;
+    aspect-ratio: 4 / 4;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-body { padding: 24px 22px 28px; }
+  .modal-title { font-size: 24px; }
+  .about-lead { font-size: 17px; }
+}
+
+/* Light mavzuda marquee matni oq fonda ko'rinmay qolmasin */
+:root[data-theme="light"] .marquee-track span { color: #fff; }
+:root[data-theme="light"] .noise { opacity: 0.02; }
+:root[data-theme="light"] .blob { opacity: 0.28; }
+:root[data-theme="light"] .cursor-dot { background: #1c140c; }
+:root[data-theme="light"] .cursor-ring { border-color: rgba(28, 20, 12, 0.4); }
+:root[data-theme="light"] .modal-backdrop { background: rgba(60, 40, 20, 0.4); }
+:root[data-theme="light"] .bento-icon { filter: invert(1); }
+:root[data-theme="light"] .work-link img,
+:root[data-theme="light"] .modal-code-link img { filter: invert(1); }
