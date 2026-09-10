@@ -1618,3 +1618,27 @@ h1, h2, h3 {
   .hero-actions .btn-fill,
   .hero-actions .btn-ghost { flex: 1; justify-content: center; }
 }
+
+/* ==================== 3D ANIMATSIYALI FON ==================== */
+.bg3d {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* 3D qatlam bo'lgani uchun blob'larni biroz susaytiramiz — ikkalasi
+   birga chuqurlik beradi, lekin matnni bosib qo'ymaydi. */
+.blob { opacity: 0.32; }
+
+/* Kunduzgi rejimda additive-blend zarralar oq fonda juda yorqin —
+   shaffofligini kamaytiramiz. */
+:root[data-theme="light"] .bg3d { opacity: 0.32; }
+:root[data-theme="light"] .blob { opacity: 0.2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bg3d { display: none; }
+}
