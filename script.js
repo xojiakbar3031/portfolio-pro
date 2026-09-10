@@ -50,19 +50,6 @@ document.getElementById("langSwitch").addEventListener("click", function (e) {
   if (btn) applyLang(btn.getAttribute("data-lang"));
 });
 
-// ===== MAVZU (dark / light) =====
-var THEME_KEY = "pp_theme";
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  safeSet(THEME_KEY, theme);
-}
-
-document.getElementById("themeToggle").addEventListener("click", function () {
-  var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
-  applyTheme(next);
-});
-
 // ===== LOADER: 0 -> 100% animatsiya =====
 const loaderNum = document.getElementById("loaderNum");
 const loaderBarFill = document.getElementById("loaderBarFill");
@@ -351,13 +338,6 @@ const statObserver = new IntersectionObserver(function (entries) {
 
 // ===== BOSHLASH =====
 (function init() {
-  // mavzu: saqlangan -> tizim sozlamasi -> dark
-  var savedTheme = safeGet(THEME_KEY);
-  if (!savedTheme) {
-    savedTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-  }
-  document.documentElement.setAttribute("data-theme", savedTheme);
-
   // til: saqlangan -> brauzer tili -> uz
   var savedLang = safeGet(LANG_KEY);
   if (!savedLang) {

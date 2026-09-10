@@ -4,8 +4,7 @@
   box-sizing: border-box;
 }
 
-:root,
-:root[data-theme="dark"] {
+:root {
   --bg: #0a0603;
   --surface: #150e08;
   --surface-2: #201408;
@@ -18,25 +17,6 @@
   --gradient: linear-gradient(120deg, var(--accent-3), var(--accent-1) 50%, var(--accent-2));
   --navbar-scrolled: rgba(5, 5, 5, 0.7);
   --shadow-strong: rgba(0, 0, 0, 0.7);
-}
-
-:root[data-theme="light"] {
-  --bg: #fbf6ef;
-  --surface: #ffffff;
-  --surface-2: #f4ece0;
-  --border: #e6d9c6;
-  --text: #1c140c;
-  --text-dim: #7a6553;
-  --accent-1: #e5341a;
-  --accent-2: #d98b12;
-  --accent-3: #e02649;
-  --gradient: linear-gradient(120deg, var(--accent-3), var(--accent-1) 50%, var(--accent-2));
-  --navbar-scrolled: rgba(251, 246, 239, 0.8);
-  --shadow-strong: rgba(90, 60, 30, 0.22);
-}
-
-body {
-  transition: background 0.35s ease, color 0.35s ease;
 }
 
 html {
@@ -388,37 +368,11 @@ h1, h2, h3 {
   background: var(--text);
 }
 
-.theme-toggle {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.theme-toggle:hover {
-  border-color: var(--accent-2);
-  transform: rotate(15deg);
-}
-
-:root[data-theme="light"] .theme-toggle .ico-moon { display: none; }
-:root[data-theme="light"] .theme-toggle .ico-sun { display: block; }
-:root[data-theme="dark"] .theme-toggle .ico-sun,
-:root:not([data-theme="light"]) .theme-toggle .ico-sun { display: none; }
-:root[data-theme="dark"] .theme-toggle .ico-moon,
-:root:not([data-theme="light"]) .theme-toggle .ico-moon { display: block; }
-
 @media (max-width: 1000px) {
   .nav-tools .btn-fill-sm { display: none; }
 }
 @media (max-width: 520px) {
   .lang-switch button { padding: 5px 8px; font-size: 11px; }
-  .theme-toggle { width: 34px; height: 34px; }
 }
 
 .navbar-inner {
@@ -1349,12 +1303,6 @@ h1, h2, h3 {
 }
 
 /* Light mavzuda marquee matni oq fonda ko'rinmay qolmasin */
-:root[data-theme="light"] .marquee-track span { color: #fff; }
-:root[data-theme="light"] .noise { opacity: 0.02; }
-:root[data-theme="light"] .blob { opacity: 0.28; }
-:root[data-theme="light"] .cursor-dot { background: #1c140c; }
-:root[data-theme="light"] .cursor-ring { border-color: rgba(28, 20, 12, 0.4); }
-:root[data-theme="light"] .modal-backdrop { background: rgba(60, 40, 20, 0.4); }
 /* Ikonkalar endi inline SVG + currentColor — rejimga o'zi moslashadi,
    invert() kerak emas. */
 
@@ -1633,11 +1581,6 @@ h1, h2, h3 {
 /* 3D qatlam bo'lgani uchun blob'larni biroz susaytiramiz — ikkalasi
    birga chuqurlik beradi, lekin matnni bosib qo'ymaydi. */
 .blob { opacity: 0.32; }
-
-/* Kunduzgi rejimda additive-blend zarralar oq fonda juda yorqin —
-   shaffofligini kamaytiramiz. */
-:root[data-theme="light"] .bg3d { opacity: 0.32; }
-:root[data-theme="light"] .blob { opacity: 0.2; }
 
 @media (prefers-reduced-motion: reduce) {
   .bg3d { display: none; }
