@@ -1,12 +1,10 @@
 // ============================================================
-// 3D ANIMATSIYALI FON — deformatsiyalanadigan wireframe shar
+// 3D ANIMATSIYALI FON — suzuvchi kristallar (Three.js)
 // ------------------------------------------------------------
-// Sahifa ortida sekin buraladigan, "nafas oladigan" katta shakl.
-// Scroll qilganda:
-//   - shakl kuchliroq deformatsiyalanadi (tikanlanadi), keyin tinchlanadi
-//   - aylanish tezlashadi, butun shakl qo'shimcha buriladi
-//   - kamera yaqinlashadi
-//   - rang palitrasi asta siljiydi
+// Sahifa ortida sekin aylanib, suzib yuradigan qirrali,
+// olmos kabi shakllar. Yorug'likni tutadi (issiq tilla + pushti
+// nur). Scroll qilganda: tezroq aylanadi, bir-biridan uzoqlashadi,
+// kamera yaqinlashadi, nur ranglari asta siljiydi.
 // Sichqoncha bilan yengil parallaks.
 // O'chadigan hollar: WebGL yo'q / "reduced motion" / tab yashiringan.
 // ============================================================
@@ -26,77 +24,80 @@
   function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
-  camera.position.set(0, 0, 58);
+  var camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 300);
+  camera.position.set(0, 0, 42);
 
-  // --- Asosiy shakl: bo'lingan ikosaedr (silliq shar) ---
-  var RADIUS = 15;
-  var geo = new THREE.IcosahedronGeometry(RADIUS, 4); // ~2.5k vertex (sekin qurilmalar uchun yengil)
-  var basePos = geo.attributes.position.array.slice(0); // asl koordinatalar
-  var vcount = geo.attributes.position.count;
+  // --- Yorug'lik: qirralar tilla va pushti nur tutadi ---
+  scene.add(new THREE.AmbientLight(0x2a1c12, 1.0));
+  var keyLight = new THREE.DirectionalLight(0xffcf7a, 2.2);  // tilla, yuqori-o'ngdan
+  keyLight.position.set(6, 8, 5);
+  scene.add(keyLight);
+  var rimLight = new THREE.DirectionalLight(0xff3f6e, 1.8);  // pushti, past-chapdan
+  rimLight.position.set(-7, -5, 3);
+  scene.add(rimLight);
+  var glint = new THREE.PointLight(0xffe0a0, 1.4, 120);      // aylanib yuradigan "chaqnash"
+  scene.add(glint);
 
-  // har vertex uchun markazdan yo'nalish (normal) — deformatsiya shu bo'yicha
-  var normDir = new Float32Array(vcount * 3);
-  for (var v = 0; v < vcount; v++) {
-    var x = basePos[v * 3], y = basePos[v * 3 + 1], z = basePos[v * 3 + 2];
-    var len = Math.sqrt(x * x + y * y + z * z) || 1;
-    normDir[v * 3] = x / len; normDir[v * 3 + 1] = y / len; normDir[v * 3 + 2] = z / len;
-  }
+  // --- Kristal shakllar ---
+  var shapeGeos = [
+    new THREE.OctahedronGeometry(1, 0),
+    new THREE.IcosahedronGeometry(1, 0),
+    new THREE.TetrahedronGeometry(1.15, 0)
+  ];
+  var edgeColors = [0xffb020, 0xff3b1f, 0xff2f56, 0xffd27a];
 
-  // vertex ranglari (y bo'yicha gradient)
-  var colors = new Float32Array(vcount * 3);
-  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  var cA = new THREE.Color(), cB = new THREE.Color(), cC = new THREE.Color(), tmp = new THREE.Color();
-  function recolor(scrollN) {
-    var hs = -0.05 * scrollN;
-    cA.setHSL(clamp(0.97 + hs, 0, 1), 0.85, 0.58);
-    cB.setHSL(clamp(0.02 + hs * 0.5, 0, 1), 0.95, 0.55);
-    cC.setHSL(clamp(0.10 + hs * 0.3, 0, 1), 0.95, 0.55);
-    var arr = geo.attributes.color.array;
-    for (var n = 0; n < vcount; n++) {
-      var ny = (basePos[n * 3 + 1] / RADIUS + 1) / 2; // 0..1
-      if (ny < 0.5) tmp.copy(cA).lerp(cB, ny * 2);
-      else tmp.copy(cB).lerp(cC, (ny - 0.5) * 2);
-      arr[n * 3] = tmp.r; arr[n * 3 + 1] = tmp.g; arr[n * 3 + 2] = tmp.b;
-    }
-    geo.attributes.color.needsUpdate = true;
-  }
-  recolor(0);
+  var crystals = [];
+  var GROUP = new THREE.Group();
+  scene.add(GROUP);
 
-  // to'liq shakl (juda xira, "tana" beradi)
-  var solid = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0.06, depthWrite: false
-  }));
-  // wireframe (asosiy vizual — porlaydigan to'r)
-  var wire = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-    vertexColors: true, wireframe: true, transparent: true, opacity: 0.5,
-    depthWrite: false, blending: THREE.AdditiveBlending
-  }));
+  var LAYOUT = [
+    // [x, y, z, scale, stretchY]
+    [11, 3, -4, 3.4, 1.9],
+    [-13, -4, -8, 4.2, 1.5],
+    [7, -8, 2, 2.2, 2.2],
+    [-8, 7, -3, 2.0, 1.7],
+    [15, -6, -12, 3.0, 1.6],
+    [-4, -1, 6, 1.5, 2.4],
+    [3, 9, -10, 2.6, 1.4],
+    [-16, 2, -5, 2.4, 2.0],
+    [18, 8, -16, 3.6, 1.5]
+  ];
 
-  var group = new THREE.Group();
-  group.add(solid);
-  group.add(wire);
-  group.position.x = 7;
-  scene.add(group);
+  for (var i = 0; i < LAYOUT.length; i++) {
+    var L = LAYOUT[i];
+    var g = shapeGeos[i % shapeGeos.length];
+    var mat = new THREE.MeshStandardMaterial({
+      color: 0x140a06, metalness: 0.6, roughness: 0.22, flatShading: true,
+      transparent: true, opacity: 0.92
+    });
+    var mesh = new THREE.Mesh(g, mat);
+    mesh.scale.set(L[3], L[3] * L[4], L[3]);
 
-  // ikkinchi kichik shakl (chuqurlik uchun) — halqa
-  var ring = new THREE.Mesh(
-    new THREE.TorusGeometry(9, 0.25, 8, 90),
-    new THREE.MeshBasicMaterial({ color: 0xffb020, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false })
-  );
-  ring.position.set(-14, -6, -8);
-  scene.add(ring);
-
-  // --- pseudo-3D shovqin (arzon, sin/cos qatlamlari) ---
-  function noise(x, y, z, t) {
-    return (
-      Math.sin(x * 1.5 + t) * 0.5 +
-      Math.sin(y * 1.8 - t * 1.1) * 0.5 +
-      Math.sin(z * 1.3 + t * 0.7) * 0.5 +
-      Math.sin((x + y) * 1.1 + t * 0.9) * 0.35 +
-      Math.sin((y + z) * 0.9 - t * 0.8) * 0.35 +
-      Math.sin((x + z) * 1.2 + t * 0.6) * 0.3
+    // porlaydigan qirralar
+    var edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(g),
+      new THREE.LineBasicMaterial({
+        color: edgeColors[i % edgeColors.length],
+        transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false
+      })
     );
+    mesh.add(edges);
+
+    var holder = new THREE.Group();
+    holder.position.set(L[0], L[1], L[2]);
+    holder.add(mesh);
+    GROUP.add(holder);
+
+    crystals.push({
+      holder: holder,
+      mesh: mesh,
+      base: new THREE.Vector3(L[0], L[1], L[2]),
+      rx: (Math.random() - 0.5) * 0.006 + 0.002,
+      ry: (Math.random() - 0.5) * 0.006 + 0.003,
+      floatSpeed: 0.3 + Math.random() * 0.5,
+      floatRange: 1.2 + Math.random() * 2.0,
+      phase: Math.random() * Math.PI * 2
+    });
   }
 
   // --- Scroll holati ---
@@ -125,61 +126,54 @@
   resize();
 
   var clock = new THREE.Clock();
-  var running = true, frame = 0, lastRecolor = -1;
+  var running = true;
+  var keyHSL = { h: 0.09, s: 0.9, l: 0.62 };
+  var rimHSL = { h: 0.95, s: 0.85, l: 0.6 };
   document.addEventListener("visibilitychange", function () {
     running = !document.hidden;
     if (running) { clock.start(); animate(); }
   });
 
-  var pos = geo.attributes.position.array;
-
   function animate() {
     if (!running) return;
     requestAnimationFrame(animate);
-    frame++;
 
     var t = clock.getElapsedTime();
     scrollCur += (scrollTarget - scrollCur) * 0.06;
     var s = scrollCur;
     var eS = easeInOut(s);
-    var swell = Math.sin(s * Math.PI);              // 0 -> 1 (o'rta) -> 0
+    var swell = Math.sin(s * Math.PI);
 
-    var amp = 1.1 + swell * 3.4 + s * 0.6;          // deformatsiya kuchi
-    var nt = t * (0.5 + s * 1.3);                    // shovqin tezligi scroll bo'yicha
+    var rotMul = 1 + s * 2.4;
+    var spread = 1 + s * 0.55 + swell * 0.15;
 
-    // --- Vertexlarni normal bo'yicha deformatsiya ---
-    for (var i = 0; i < vcount; i++) {
-      var bx = basePos[i * 3], by = basePos[i * 3 + 1], bz = basePos[i * 3 + 2];
-      var d = noise(bx * 0.13, by * 0.13, bz * 0.13, nt) * amp;
-      pos[i * 3] = bx + normDir[i * 3] * d;
-      pos[i * 3 + 1] = by + normDir[i * 3 + 1] * d;
-      pos[i * 3 + 2] = bz + normDir[i * 3 + 2] * d;
-    }
-    geo.attributes.position.needsUpdate = true;
-
-    // rang — har ~14 kadrda / scroll sezilarli o'zgarganda
-    if (frame % 14 === 0 && Math.abs(s - lastRecolor) > 0.02) {
-      recolor(s); lastRecolor = s;
+    for (var i = 0; i < crystals.length; i++) {
+      var c = crystals[i];
+      c.mesh.rotation.x += c.rx * rotMul;
+      c.mesh.rotation.y += c.ry * rotMul;
+      c.holder.position.x = c.base.x * spread + Math.sin(t * c.floatSpeed * 0.6 + c.phase) * 0.8;
+      c.holder.position.y = c.base.y * spread + Math.sin(t * c.floatSpeed + c.phase) * c.floatRange;
+      c.holder.position.z = c.base.z * (1 + s * 0.2);
+      var sc = 1 + swell * 0.12;
+      c.holder.scale.setScalar(sc);
     }
 
-    // --- Aylanish: doimiy + scroll bo'yicha tezlashadi + sichqoncha ---
-    group.rotation.y += 0.002 + s * 0.011;
-    group.rotation.x = lerp(group.rotation.x, 0.2 + my * 0.4 + s * 1.4, 0.05);
-    group.rotation.z = lerp(group.rotation.z, mx * 0.3 + swell * 0.3, 0.05);
-    group.position.x = lerp(group.position.x, 7 - s * 5 + mx * 4, 0.05);
-    group.position.y = lerp(group.position.y, my * 3 - s * 2, 0.05);
+    // butun to'p scroll bo'yicha biroz buriladi + sichqoncha parallaksi
+    GROUP.rotation.y = lerp(GROUP.rotation.y, s * 0.7 + mx * 0.25, 0.05);
+    GROUP.rotation.x = lerp(GROUP.rotation.x, my * 0.18 - s * 0.15, 0.05);
 
-    ring.rotation.x += 0.004 + s * 0.004;
-    ring.rotation.y -= 0.003;
-    ring.position.x = lerp(ring.position.x, -14 + s * 6, 0.05);
+    // aylanib yuradigan chaqnash
+    glint.position.set(Math.cos(t * 0.5) * 22, Math.sin(t * 0.4) * 14, Math.sin(t * 0.5) * 18 + 8);
 
-    // --- Kamera yaqinlashadi ---
-    camera.position.z = lerp(camera.position.z, lerp(58, 40, eS) - swell * 4, 0.05);
-    camera.position.x = lerp(camera.position.x, mx * 5, 0.05);
+    // nur ranglarini scroll bo'yicha ozgina siljitamiz
+    keyLight.color.setHSL(keyHSL.h - s * 0.03, keyHSL.s, keyHSL.l);
+    rimLight.color.setHSL(rimHSL.h - s * 0.04, rimHSL.s, rimHSL.l);
+
+    // kamera yaqinlashadi + parallaks
+    camera.position.x = lerp(camera.position.x, mx * 6, 0.04);
+    camera.position.y = lerp(camera.position.y, my * 4, 0.04);
+    camera.position.z = lerp(camera.position.z, lerp(42, 30, eS) - swell * 3, 0.04);
     camera.lookAt(0, 0, 0);
-
-    wire.material.opacity = 0.42 + swell * 0.18;
-    ring.material.opacity = 0.22 + swell * 0.14;
 
     renderer.render(scene, camera);
   }
