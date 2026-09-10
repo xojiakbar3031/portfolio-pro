@@ -1,12 +1,13 @@
 // ============================================================
-// 3D ANIMATSIYALI FON — scroll'ga reaksiya qiladi (Three.js)
+// 3D ANIMATSIYALI FON — deformatsiyalanadigan wireframe shar
 // ------------------------------------------------------------
-// Butun sahifa ortidagi zarralar maydoni. Sahifani scroll qilganda:
-//   - kamera maydon ustidan uchib o'tadi (baland -> yaqin -> orqaga)
-//   - to'lqin kuchayadi, tezlashadi, keyin tinchlanadi
-//   - rang palitrasi asta o'zgaradi (qip-qizil -> to'q sariq -> kuydirilgan)
-//   - butun maydon ~90 gradusga buriladi
-// Sichqoncha bilan yengil parallaks ham bor.
+// Sahifa ortida sekin buraladigan, "nafas oladigan" katta shakl.
+// Scroll qilganda:
+//   - shakl kuchliroq deformatsiyalanadi (tikanlanadi), keyin tinchlanadi
+//   - aylanish tezlashadi, butun shakl qo'shimcha buriladi
+//   - kamera yaqinlashadi
+//   - rang palitrasi asta siljiydi
+// Sichqoncha bilan yengil parallaks.
 // O'chadigan hollar: WebGL yo'q / "reduced motion" / tab yashiringan.
 // ============================================================
 (function () {
@@ -17,89 +18,86 @@
   var renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-  } catch (e) {
-    return;
-  }
+  } catch (e) { return; }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-  var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   var lerp = (THREE.MathUtils && THREE.MathUtils.lerp) || function (a, b, t) { return a + (b - a) * t; };
   var clamp = (THREE.MathUtils && THREE.MathUtils.clamp) || function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
-  // --- Yumaloq, yumshoq zarra teksturasi (kvadrat nuqtalar o'rniga) ---
-  var sprite = (function () {
-    var c = document.createElement("canvas");
-    c.width = c.height = 64;
-    var g = c.getContext("2d");
-    var rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    rg.addColorStop(0, "rgba(255,255,255,1)");
-    rg.addColorStop(0.35, "rgba(255,255,255,0.85)");
-    rg.addColorStop(1, "rgba(255,255,255,0)");
-    g.fillStyle = rg;
-    g.fillRect(0, 0, 64, 64);
-    var tex = new THREE.CanvasTexture(c);
-    return tex;
-  })();
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+  camera.position.set(0, 0, 58);
 
-  // --- Zarralar maydoni ---
-  var COLS = 110, ROWS = 110, GAP = 1.5;
-  var count = COLS * ROWS;
-  var positions = new Float32Array(count * 3);
-  var colors = new Float32Array(count * 3);
-  var baseCol = new Float32Array(count); // har zarra uchun diagonal t (0..1) — rangni qayta hisoblash uchun
+  // --- Asosiy shakl: bo'lingan ikosaedr (silliq shar) ---
+  var RADIUS = 15;
+  var geo = new THREE.IcosahedronGeometry(RADIUS, 4); // ~2.5k vertex (sekin qurilmalar uchun yengil)
+  var basePos = geo.attributes.position.array.slice(0); // asl koordinatalar
+  var vcount = geo.attributes.position.count;
 
-  var i = 0;
-  for (var x = 0; x < COLS; x++) {
-    for (var z = 0; z < ROWS; z++) {
-      positions[i * 3] = (x - COLS / 2) * GAP;
-      positions[i * 3 + 1] = 0;
-      positions[i * 3 + 2] = (z - ROWS / 2) * GAP;
-      baseCol[i] = (x / COLS + z / ROWS) / 2;
-      i++;
-    }
+  // har vertex uchun markazdan yo'nalish (normal) — deformatsiya shu bo'yicha
+  var normDir = new Float32Array(vcount * 3);
+  for (var v = 0; v < vcount; v++) {
+    var x = basePos[v * 3], y = basePos[v * 3 + 1], z = basePos[v * 3 + 2];
+    var len = Math.sqrt(x * x + y * y + z * z) || 1;
+    normDir[v * 3] = x / len; normDir[v * 3 + 1] = y / len; normDir[v * 3 + 2] = z / len;
   }
 
-  var geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  // vertex ranglari (y bo'yicha gradient)
+  var colors = new Float32Array(vcount * 3);
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-
-  var mat = new THREE.PointsMaterial({
-    size: 0.55,
-    map: sprite,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.95,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-    sizeAttenuation: true
-  });
-
-  var points = new THREE.Points(geo, mat);
-  points.position.y = -7;
-  scene.add(points);
-
-  // --- Rang palitrasini scroll bo'yicha qayta hisoblash (tejamli, throttled) ---
   var cA = new THREE.Color(), cB = new THREE.Color(), cC = new THREE.Color(), tmp = new THREE.Color();
   function recolor(scrollN) {
-    // palitra: yuqorida (0) qip-qizil/tilla, pastda (1) to'q kuydirilgan tomon suriladi
-    var hueShift = -0.06 * scrollN;      // ozgina magenta -> qahrabo tomon
-    cA.setHSL(clamp(0.97 + hueShift, 0, 1), 0.85, 0.55);  // ~#ff2f56
-    cB.setHSL(clamp(0.03 + hueShift * 0.5, 0, 1), 0.95, 0.53); // ~#ff3b1f
-    cC.setHSL(clamp(0.10 + hueShift * 0.3, 0, 1), 0.95, 0.55); // ~#ffb020
+    var hs = -0.05 * scrollN;
+    cA.setHSL(clamp(0.97 + hs, 0, 1), 0.85, 0.58);
+    cB.setHSL(clamp(0.02 + hs * 0.5, 0, 1), 0.95, 0.55);
+    cC.setHSL(clamp(0.10 + hs * 0.3, 0, 1), 0.95, 0.55);
     var arr = geo.attributes.color.array;
-    for (var n = 0; n < count; n++) {
-      var t = baseCol[n];
-      if (t < 0.5) tmp.copy(cA).lerp(cB, t * 2);
-      else tmp.copy(cB).lerp(cC, (t - 0.5) * 2);
+    for (var n = 0; n < vcount; n++) {
+      var ny = (basePos[n * 3 + 1] / RADIUS + 1) / 2; // 0..1
+      if (ny < 0.5) tmp.copy(cA).lerp(cB, ny * 2);
+      else tmp.copy(cB).lerp(cC, (ny - 0.5) * 2);
       arr[n * 3] = tmp.r; arr[n * 3 + 1] = tmp.g; arr[n * 3 + 2] = tmp.b;
     }
     geo.attributes.color.needsUpdate = true;
   }
   recolor(0);
+
+  // to'liq shakl (juda xira, "tana" beradi)
+  var solid = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.06, depthWrite: false
+  }));
+  // wireframe (asosiy vizual — porlaydigan to'r)
+  var wire = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+    vertexColors: true, wireframe: true, transparent: true, opacity: 0.5,
+    depthWrite: false, blending: THREE.AdditiveBlending
+  }));
+
+  var group = new THREE.Group();
+  group.add(solid);
+  group.add(wire);
+  group.position.x = 7;
+  scene.add(group);
+
+  // ikkinchi kichik shakl (chuqurlik uchun) — halqa
+  var ring = new THREE.Mesh(
+    new THREE.TorusGeometry(9, 0.25, 8, 90),
+    new THREE.MeshBasicMaterial({ color: 0xffb020, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  ring.position.set(-14, -6, -8);
+  scene.add(ring);
+
+  // --- pseudo-3D shovqin (arzon, sin/cos qatlamlari) ---
+  function noise(x, y, z, t) {
+    return (
+      Math.sin(x * 1.5 + t) * 0.5 +
+      Math.sin(y * 1.8 - t * 1.1) * 0.5 +
+      Math.sin(z * 1.3 + t * 0.7) * 0.5 +
+      Math.sin((x + y) * 1.1 + t * 0.9) * 0.35 +
+      Math.sin((y + z) * 0.9 - t * 0.8) * 0.35 +
+      Math.sin((x + z) * 1.2 + t * 0.6) * 0.3
+    );
+  }
 
   // --- Scroll holati ---
   var scrollTarget = 0, scrollCur = 0;
@@ -110,14 +108,13 @@
   window.addEventListener("scroll", readScroll, { passive: true });
   readScroll();
 
-  // --- Sichqoncha parallaksi ---
+  // --- Sichqoncha ---
   var mx = 0, my = 0;
   window.addEventListener("mousemove", function (e) {
     mx = e.clientX / window.innerWidth - 0.5;
     my = e.clientY / window.innerHeight - 0.5;
   });
 
-  // --- O'lcham ---
   function resize() {
     var w = window.innerWidth, h = window.innerHeight;
     camera.aspect = w / h;
@@ -127,15 +124,14 @@
   window.addEventListener("resize", resize);
   resize();
 
-  // --- Animatsiya ---
   var clock = new THREE.Clock();
-  var running = true;
-  var frame = 0, lastRecolorAt = -1;
-
+  var running = true, frame = 0, lastRecolor = -1;
   document.addEventListener("visibilitychange", function () {
     running = !document.hidden;
     if (running) { clock.start(); animate(); }
   });
+
+  var pos = geo.attributes.position.array;
 
   function animate() {
     if (!running) return;
@@ -144,53 +140,46 @@
 
     var t = clock.getElapsedTime();
     scrollCur += (scrollTarget - scrollCur) * 0.06;
-    var s = scrollCur;                 // 0..1 silliqlangan scroll
+    var s = scrollCur;
     var eS = easeInOut(s);
-    var swell = Math.sin(s * Math.PI); // 0 -> 1 (o'rtada) -> 0
+    var swell = Math.sin(s * Math.PI);              // 0 -> 1 (o'rta) -> 0
 
-    // --- To'lqin: amplituda va tezlik scroll bo'yicha o'zgaradi ---
-    var amp = 1.0 + swell * 1.9 + s * 0.4;          // tinch -> katta -> biroz tinch
-    var speed = 0.6 + s * 1.7;                       // scroll -> tezroq
-    var twist = swell * 0.9;                         // o'rtada buralish kuchli
-    var pos = geo.attributes.position.array;
-    var k = 0;
-    for (var xx = 0; xx < COLS; xx++) {
-      for (var zz = 0; zz < ROWS; zz++) {
-        var wx = (xx - COLS / 2) * 0.26;
-        var wz = (zz - ROWS / 2) * 0.26;
-        var d = Math.sqrt(wx * wx + wz * wz);
-        pos[k * 3 + 1] =
-          (Math.sin(wx + t * speed) * 1.5 +
-           Math.cos(wz * 0.8 + t * speed * 0.8) * 1.5 +
-           Math.sin((wx + wz) * 0.5 + t * speed * 0.6) * 0.9 +
-           Math.sin(d - t * speed * 0.9) * twist * 2.2) * amp;
-        k++;
-      }
+    var amp = 1.1 + swell * 3.4 + s * 0.6;          // deformatsiya kuchi
+    var nt = t * (0.5 + s * 1.3);                    // shovqin tezligi scroll bo'yicha
+
+    // --- Vertexlarni normal bo'yicha deformatsiya ---
+    for (var i = 0; i < vcount; i++) {
+      var bx = basePos[i * 3], by = basePos[i * 3 + 1], bz = basePos[i * 3 + 2];
+      var d = noise(bx * 0.13, by * 0.13, bz * 0.13, nt) * amp;
+      pos[i * 3] = bx + normDir[i * 3] * d;
+      pos[i * 3 + 1] = by + normDir[i * 3 + 1] * d;
+      pos[i * 3 + 2] = bz + normDir[i * 3 + 2] * d;
     }
     geo.attributes.position.needsUpdate = true;
 
-    // --- Rangni har ~12 kadrda va scroll sezilarli o'zgarganda yangilaymiz ---
-    if (frame % 12 === 0 && Math.abs(s - lastRecolorAt) > 0.015) {
-      recolor(s);
-      lastRecolorAt = s;
+    // rang — har ~14 kadrda / scroll sezilarli o'zgarganda
+    if (frame % 14 === 0 && Math.abs(s - lastRecolor) > 0.02) {
+      recolor(s); lastRecolor = s;
     }
 
-    // --- Kamera: baland/uzoq -> past/yaqin -> orqaga tortiladi ---
-    var camY = lerp(24, 4, eS) + Math.sin(s * Math.PI) * -6;   // o'rtada sirtga yaqinlashadi
-    var camZ = lerp(50, 28, eS) + swell * -6;
-    camera.position.x = lerp(camera.position.x, mx * 8, 0.05);
-    camera.position.y = lerp(camera.position.y, camY, 0.05);
-    camera.position.z = lerp(camera.position.z, camZ, 0.05);
-    camera.lookAt(mx * 4, -4 + s * 4 + my * 3, -6 + s * 14);
+    // --- Aylanish: doimiy + scroll bo'yicha tezlashadi + sichqoncha ---
+    group.rotation.y += 0.002 + s * 0.011;
+    group.rotation.x = lerp(group.rotation.x, 0.2 + my * 0.4 + s * 1.4, 0.05);
+    group.rotation.z = lerp(group.rotation.z, mx * 0.3 + swell * 0.3, 0.05);
+    group.position.x = lerp(group.position.x, 7 - s * 5 + mx * 4, 0.05);
+    group.position.y = lerp(group.position.y, my * 3 - s * 2, 0.05);
 
-    // --- Butun maydon scroll bo'yicha buriladi + doimiy sekin aylanish ---
-    points.rotation.y = s * Math.PI * 0.5 + t * 0.02 + mx * 0.25;
-    points.rotation.x = -0.15 + my * 0.12 - swell * 0.08;
-    points.rotation.z = twist * 0.12;
+    ring.rotation.x += 0.004 + s * 0.004;
+    ring.rotation.y -= 0.003;
+    ring.position.x = lerp(ring.position.x, -14 + s * 6, 0.05);
 
-    // --- Zarra o'lchami va yorqinligi ---
-    mat.size = 0.5 + eS * 0.4 + swell * 0.15;
-    mat.opacity = 0.9 + swell * 0.08;
+    // --- Kamera yaqinlashadi ---
+    camera.position.z = lerp(camera.position.z, lerp(58, 40, eS) - swell * 4, 0.05);
+    camera.position.x = lerp(camera.position.x, mx * 5, 0.05);
+    camera.lookAt(0, 0, 0);
+
+    wire.material.opacity = 0.42 + swell * 0.18;
+    ring.material.opacity = 0.22 + swell * 0.14;
 
     renderer.render(scene, camera);
   }
