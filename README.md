@@ -1,35 +1,34 @@
-# Portfolio Pro — Xojiakbar Saydullayev
+# Portfolio — Xojiakbar Saydullayev
 
-Oddiy [portfolio](https://github.com/xojiakbar3031/portfolio) sahifasidan farqli,
-bu — dizayn va animatsiya ko'nikmalarini namoyish qilish uchun qurilgan
-"premium" landing page. Build qadamisiz — HTML, CSS va vanilla JavaScript.
+**Live → https://xojiakbar3031.github.io/portfolio-pro/**
 
-## Effektlar
+Personal site of an **AI engineer & frontend developer**. It's a single page in three
+languages (UZ / RU / EN) with a Three.js background that reacts to scroll, and it needs
+no build step: plain HTML, CSS and vanilla JavaScript.
 
-- Sahifa yuklanish animatsiyasi (loader)
-- Maxsus kursor (dot + lag bilan yuruvchi halqa), hover'da kattalashadi
-- Animatsion gradient "blob" fon + shovqin (noise) tekstura
-- Hero'da so'zma-so'z paydo bo'ladigan sarlavha
-- Cheksiz aylanadigan marquee lenta
-- Bento-grid, sichqoncha harakatiga qarab 3D tilt effekti
-- Loyihalar galereyasi — katta raqamlar, parallaks-uslub rasm zoom
-- Scroll'da sanaladigan statistika raqamlari
-- Magnit tugmalar (sichqoncha tomon biroz "tortiladi")
+## Highlights
 
-## Rasm qo'shish
+- **3D background** (Three.js) with floating crystals that react to scroll and the
+  mouse. It turns off automatically with `prefers-reduced-motion`, when WebGL is
+  unavailable, and when the tab is hidden.
+- **Three languages**, switched instantly and remembered. All copy lives in
+  [`i18n.js`](i18n.js).
+- **Projects** are rendered from [`projects.js`](projects.js) and open in a details
+  modal. Projects without a live demo (bots, desktop agent) show only the code link.
+- A working **contact form** (FormSubmit), a **CV download**, live **GitHub repo
+  count** from the API, and an "available for freelance" badge.
+- Micro-interactions: loader, custom cursor, magnetic buttons, word-by-word hero,
+  3D tilt cards, scroll progress and a section indicator.
 
-`index.html` ichidagi `#heroPhoto` elementiga o'z rasmingizni qo'shish uchun:
+## Run locally
 
-```html
-<div class="hero-photo has-image" id="heroPhoto">
-  <img src="your-photo.jpg" alt="Xojiakbar Saydullayev">
-</div>
+```bash
+npx serve .
+# or
+python -m http.server 8000
 ```
 
-## Ishga tushirish
+## Add a project
 
-`index.html` faylini brauzerda oching yoki:
-
-```
-npx http-server .
-```
+Add an entry to `WORK_PROJECTS` in `projects.js` (`title`, `description` in uz/ru/en,
+`tags`, `image`, `code`, and optionally `demo`). Put a 1280×800 screenshot in `assets/`.

@@ -1585,3 +1585,7 @@ h1, h2, h3 {
 @media (prefers-reduced-motion: reduce) {
   .bg3d { display: none; }
 }
+
+[hidden] {
+  display: none !important;
+}

@@ -208,8 +208,10 @@ function renderWork() {
         '<p class="work-desc">' + desc + '</p>' +
         '<div class="work-tags">' + tagsHTML + '</div>' +
         '<div class="work-links">' +
-          '<a href="' + project.demo + '" target="_blank" rel="noopener" class="work-link" data-hover>' +
-            SVG_EXTERNAL + ' ' + dict.workView + '</a>' +
+          (project.demo
+            ? '<a href="' + project.demo + '" target="_blank" rel="noopener" class="work-link" data-hover>' +
+              SVG_EXTERNAL + ' ' + dict.workView + '</a>'
+            : '') +
           '<a href="' + project.code + '" target="_blank" rel="noopener" class="work-link" data-hover>' +
             SVG_GITHUB + ' ' + dict.workCode + '</a>' +
         '</div>' +
@@ -258,7 +260,9 @@ function openModal(index) {
   modalTitle.textContent = p.title;
   modalDesc.textContent = desc;
   modalTags.innerHTML = p.tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join("");
-  modalDemo.href = p.demo;
+  // Live demo bo'lmagan loyihalarda (bot, desktop agent) tugma yashiriladi
+  modalDemo.hidden = !p.demo;
+  if (p.demo) modalDemo.href = p.demo;
   modalCode.href = p.code;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
