@@ -1,12 +1,15 @@
 // ============================================================
-// 3D ANIMATSIYALI FON — "aurora" + neyron tarmoq (Three.js)
+// 3D FON — scroll bilan shakl o'zgartiradigan zarrachalar (Three.js)
 // ------------------------------------------------------------
-// 1) Aurora: GPU shader'da oqib turuvchi iliq yorug'lik (domain-warped
-//    fbm shovqin). Past o'lchamli buferga chiziladi va kattalashtiriladi —
-//    zaif videokartalarda ham yengil ishlaydi.
-// 2) Neyron tarmoq: fazoda sekin suzuvchi nuqtalar, yaqinlari chiziq bilan
-//    ulanadi. Sichqoncha yaqinidagi nuqtalar yorishadi va kursorga ulanadi.
-// Scroll: aurora rangi siljiydi, tarmoq buriladi, kamera yaqinlashadi.
+// ~7000 ta nuqta har bir bo'limda boshqa shaklga yig'iladi:
+//   hero    -> portret atrofida aylanuvchi orbita halqasi
+//   about   -> sfera
+//   work    -> to'lqinli tekislik
+//   process -> qo'sh spiral (DNK)
+//   contact -> katta globus
+// Har bir nuqtaning 5 ta shakldagi o'rni GPU'ga oldindan beriladi,
+// bo'limlar orasida og'irliklar silliq almashadi — sakrashlarsiz morf.
+// Sichqoncha yaqinidagi nuqtalar chetga suriladi va ko'k rangga kiradi.
 // O'chadigan hollar: WebGL yo'q / "reduced motion" / tab yashiringan.
 // ============================================================
 (function () {
@@ -16,183 +19,226 @@
 
   var renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: false, antialias: true, powerPreference: "high-performance" });
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: false, powerPreference: "high-performance" });
   } catch (e) { return; }
-  var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-  renderer.setPixelRatio(DPR);
-  renderer.autoClear = false;
+  var PR = Math.min(window.devicePixelRatio || 1, 1.75);
+  renderer.setPixelRatio(PR);
+  renderer.setClearColor(0x000000, 0);
   document.body.classList.add("has-bg3d");
 
-  var isMobile = window.matchMedia("(max-width: 760px)").matches;
-  var lerp = function (a, b, t) { return a + (b - a) * t; };
-  var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+  var isMobile = window.matchMedia("(max-width: 1000px)").matches;
+  var N = isMobile ? 3600 : 7000;
+  var SECTIONS = ["top", "about", "work", "process", "contact"];
+  var K = SECTIONS.length;
 
-  // ---------------- 1) AURORA ----------------
-  var AURORA_SCALE = 0.35; // bufer o'lchami (ekranga nisbatan)
-  var orthoCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  var quad = new THREE.PlaneGeometry(2, 2);
+  // ---------------- tasodifiy yordamchilar ----------------
+  function gauss() {
+    var u = 1 - Math.random(), v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  var tmpV = new THREE.Vector3();
+  var tmpE = new THREE.Euler();
 
-  var auroraUniforms = {
+  // ---------------- shakllar ----------------
+  // har biri: { pos: Float32Array(N*3), center, axis, spin }
+  function orbitRing(center, R, tilt) {
+    var pos = new Float32Array(N * 3);
+    tmpE.set(tilt[0], 0, tilt[1]);
+    for (var i = 0; i < N; i++) {
+      var a = Math.random() * Math.PI * 2, r, y;
+      var k = Math.random();
+      if (k < 0.72) { r = R + gauss() * 0.28; y = gauss() * 0.18; }          // asosiy halqa
+      else if (k < 0.9) { r = R * 1.32 + gauss() * 0.5; y = gauss() * 0.35; } // ikkinchi, xira orbita
+      else { r = R * (0.6 + Math.random() * 1.2); y = gauss() * 2.2; }        // atrofdagi chang
+      tmpV.set(Math.cos(a) * r, y, Math.sin(a) * r).applyEuler(tmpE).add(center);
+      pos[i * 3] = tmpV.x; pos[i * 3 + 1] = tmpV.y; pos[i * 3 + 2] = tmpV.z;
+    }
+    var axis = new THREE.Vector3(0, 1, 0).applyEuler(tmpE).normalize();
+    return { pos: pos, center: center, axis: axis, spin: 0.18 };
+  }
+
+  function sphere(center, R, spin) {
+    var pos = new Float32Array(N * 3);
+    var golden = Math.PI * (3 - Math.sqrt(5));
+    for (var i = 0; i < N; i++) {
+      var y = 1 - (i / (N - 1)) * 2;
+      var rr = Math.sqrt(1 - y * y);
+      var th = golden * i;
+      var shell = Math.random() < 0.86 ? 1 + gauss() * 0.012 : Math.random() * 0.9;
+      pos[i * 3] = center.x + Math.cos(th) * rr * R * shell;
+      pos[i * 3 + 1] = center.y + y * R * shell;
+      pos[i * 3 + 2] = center.z + Math.sin(th) * rr * R * shell;
+    }
+    return { pos: pos, center: center, axis: new THREE.Vector3(0.15, 1, 0).normalize(), spin: spin };
+  }
+
+  function wavePlane(center, W, D) {
+    var pos = new Float32Array(N * 3);
+    var cols = Math.round(Math.sqrt(N * (W / D))), rows = Math.ceil(N / cols);
+    for (var i = 0; i < N; i++) {
+      var cx = i % cols, cz = Math.floor(i / cols);
+      var x = (cx / (cols - 1) - 0.5) * W;
+      var z = (cz / (rows - 1) - 0.5) * D;
+      var y = Math.sin(x * 0.28) * Math.cos(z * 0.33) * 1.8 + Math.sin((x + z) * 0.12) * 1.2;
+      pos[i * 3] = center.x + x; pos[i * 3 + 1] = center.y + y; pos[i * 3 + 2] = center.z + z;
+    }
+    return { pos: pos, center: center, axis: new THREE.Vector3(0, 1, 0), spin: 0.03 };
+  }
+
+  function helix(center, L, R) {
+    var pos = new Float32Array(N * 3);
+    for (var i = 0; i < N; i++) {
+      var x = (Math.random() - 0.5) * L, a = x * 0.42, y, z;
+      if (Math.random() < 0.8) {                       // ikki ip
+        var strand = Math.random() < 0.5 ? 0 : Math.PI;
+        y = Math.cos(a + strand) * R + gauss() * 0.12;
+        z = Math.sin(a + strand) * R + gauss() * 0.12;
+      } else {                                          // ular orasidagi "zinapoyalar"
+        x = Math.round(x / 1.5) * 1.5; a = x * 0.42;
+        var t = Math.random() * 2 - 1;
+        y = Math.cos(a) * R * t; z = Math.sin(a) * R * t;
+      }
+      pos[i * 3] = center.x + x; pos[i * 3 + 1] = center.y + y; pos[i * 3 + 2] = center.z + z;
+    }
+    return { pos: pos, center: center, axis: new THREE.Vector3(1, 0, 0), spin: 0.35 };
+  }
+
+  // kamera z=30, fov=50 -> ekran yarim balandligi ~14 birlik
+  var shapes = isMobile ? [
+    orbitRing(new THREE.Vector3(0, 6.5, 0), 6.5, [1.2, -0.25]),
+    sphere(new THREE.Vector3(0, 0, -4), 7, 0.12),
+    wavePlane(new THREE.Vector3(0, -7, -4), 34, 26),
+    helix(new THREE.Vector3(0, 0, -6), 34, 2.6),
+    sphere(new THREE.Vector3(0, 0, -6), 9, 0.08)
+  ] : [
+    orbitRing(new THREE.Vector3(10.5, 3.2, 1), 8.6, [1.18, -0.32]),
+    sphere(new THREE.Vector3(12.5, -0.5, -2), 7.2, 0.12),
+    wavePlane(new THREE.Vector3(0, -8.5, -6), 64, 34),
+    helix(new THREE.Vector3(0, -1, -4), 56, 3.2),
+    sphere(new THREE.Vector3(0, 0, -8), 11.5, 0.07)
+  ];
+
+  // ---------------- geometriya ----------------
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(shapes[0].pos.slice(), 3));
+  for (var s = 0; s < K; s++) geo.setAttribute("p" + s, new THREE.BufferAttribute(shapes[s].pos, 3));
+  var rnd = new Float32Array(N * 3);
+  for (var i = 0; i < rnd.length; i++) rnd[i] = Math.random();
+  geo.setAttribute("aRand", new THREE.BufferAttribute(rnd, 3));
+
+  var uniforms = {
     uTime: { value: 0 },
-    uRes: { value: new THREE.Vector2(1, 1) },
-    uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-    uScroll: { value: 0 }
+    uW: { value: [1, 0, 0, 0, 0] },
+    uC: { value: shapes.map(function (sh) { return sh.center; }) },
+    uAx: { value: shapes.map(function (sh) { return sh.axis; }) },
+    uSpin: { value: shapes.map(function (sh) { return sh.spin; }) },
+    uMorph: { value: 0 },
+    uMouse: { value: new THREE.Vector3(999, 999, 0) },
+    uMouseOn: { value: 0 },
+    uSize: { value: isMobile ? 2.6 : 2.2 },
+    uPR: { value: PR },
+    uOpacity: { value: 1 }
   };
 
-  var auroraMat = new THREE.ShaderMaterial({
-    uniforms: auroraUniforms,
-    depthTest: false,
+  var material = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    transparent: true,
     depthWrite: false,
-    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
-    fragmentShader: [
-      "precision highp float;",
-      "varying vec2 vUv;",
-      "uniform float uTime; uniform vec2 uRes; uniform vec2 uMouse; uniform float uScroll;",
-      "float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }",
-      "float noise(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f*f*(3.0-2.0*f);",
-      "  return mix(mix(hash(i), hash(i+vec2(1.,0.)), f.x), mix(hash(i+vec2(0.,1.)), hash(i+vec2(1.,1.)), f.x), f.y); }",
-      "float fbm(vec2 p){ float v = 0.0; float a = 0.5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6);",
-      "  for (int i = 0; i < 4; i++){ v += a * noise(p); p = m * p; a *= 0.5; } return v; }",
+    blending: THREE.AdditiveBlending,
+    vertexShader: [
+      "attribute vec3 p0; attribute vec3 p1; attribute vec3 p2; attribute vec3 p3; attribute vec3 p4;",
+      "attribute vec3 aRand;",
+      "uniform float uW[5]; uniform vec3 uC[5]; uniform vec3 uAx[5]; uniform float uSpin[5];",
+      "uniform float uTime; uniform float uMorph; uniform vec3 uMouse; uniform float uMouseOn;",
+      "uniform float uSize; uniform float uPR;",
+      "varying vec3 vCol; varying float vA;",
+      "vec3 rot(vec3 p, vec3 c, vec3 ax, float a){",
+      "  p -= c; float s = sin(a); float co = cos(a);",
+      "  return c + p * co + cross(ax, p) * s + ax * dot(ax, p) * (1.0 - co);",
+      "}",
       "void main(){",
-      "  float aspect = uRes.x / uRes.y;",
-      "  vec2 uv = vUv; vec2 p = vec2(uv.x * aspect, uv.y) * 1.7;",
-      "  float t = uTime * 0.045;",
-      "  vec2 q = vec2(fbm(p + vec2(0.0, t)), fbm(p + vec2(5.2, 1.3) - t));",
-      "  vec2 r = vec2(fbm(p + 3.2*q + vec2(1.7, 9.2) + t*1.4), fbm(p + 3.2*q + vec2(8.3, 2.8) - t*1.2));",
-      "  float f = fbm(p + 2.6*r);",
-      "  vec3 base = vec3(0.039, 0.024, 0.012);",
-      "  vec3 ember = vec3(1.0, 0.23, 0.12);",
-      "  vec3 gold = vec3(1.0, 0.69, 0.13);",
-      "  vec3 rose = vec3(1.0, 0.18, 0.34);",
-      "  vec3 violet = vec3(0.45, 0.2, 1.0);",
-      // scroll bo'yicha: iliq oltin -> qizil/pushti -> binafsha urg'u
-      "  vec3 hi = mix(gold, rose, smoothstep(0.15, 0.6, uScroll));",
-      "  vec3 accent = mix(ember, violet, smoothstep(0.55, 1.0, uScroll) * 0.6);",
-      "  vec3 col = base;",
-      "  col = mix(col, accent * 0.85, smoothstep(0.38, 0.9, f));",
-      "  col = mix(col, hi * 0.7, smoothstep(0.5, 1.0, r.x) * 0.8);",
-      "  col += rose * 0.22 * smoothstep(0.55, 1.0, q.y);",
-      // aurora tasmasi — yuqori qismda kuchliroq, matn joylashgan pastki qismda xiraroq
-      "  float band = smoothstep(0.0, 0.9, uv.y) * 0.45 + 0.55;",
-      "  col *= band;",
-      // kursor nuri
-      "  vec2 d = vec2((uv.x - uMouse.x) * aspect, uv.y - uMouse.y);",
-      "  col += ember * 0.28 * exp(-dot(d, d) * 6.0);",
-      // vin'etka
-      "  vec2 v = uv - 0.5; col *= 1.0 - dot(v, v) * 0.7;",
-      "  gl_FragColor = vec4(col, 1.0);",
+      "  float t = uTime;",
+      "  vec3 pos = uW[0] * rot(p0, uC[0], uAx[0], t * uSpin[0])",
+      "          + uW[1] * rot(p1, uC[1], uAx[1], t * uSpin[1])",
+      "          + uW[2] * rot(p2, uC[2], uAx[2], t * uSpin[2])",
+      "          + uW[3] * rot(p3, uC[3], uAx[3], t * uSpin[3])",
+      "          + uW[4] * rot(p4, uC[4], uAx[4], t * uSpin[4]);",
+      // tirik "nafas" va to'lqin tekisligidagi harakat
+      "  pos += vec3(sin(t * 0.7 + aRand.x * 6.28), cos(t * 0.6 + aRand.y * 6.28), sin(t * 0.5 + aRand.z * 6.28)) * 0.08;",
+      "  pos.y += uW[2] * sin(pos.x * 0.25 + t * 0.9) * 0.6;",
+      // morf paytida nuqtalar biroz tarqaladi
+      "  vec3 dir = normalize(aRand - 0.5 + 0.0001);",
+      "  pos += dir * uMorph * (3.0 + aRand.y * 5.0);",
+      // sichqoncha: yaqin nuqtalarni itaradi
+      "  vec2 d = pos.xy - uMouse.xy; float l = length(d);",
+      "  float f = uMouseOn * (1.0 - smoothstep(0.0, 4.2, l));",
+      "  pos.xy += normalize(d + 0.0001) * f * 2.4; pos.z += f * 1.5;",
+      "  vec4 mv = modelViewMatrix * vec4(pos, 1.0);",
+      "  gl_Position = projectionMatrix * mv;",
+      "  gl_PointSize = uSize * (0.55 + aRand.y * 0.9) * uPR * (30.0 / -mv.z);",
+      "  vec3 white = vec3(0.86, 0.89, 1.0); vec3 blue = vec3(0.43, 0.55, 1.0);",
+      "  vCol = mix(white, blue, clamp(aRand.x * 0.75 + f, 0.0, 1.0));",
+      "  vA = (0.25 + 0.75 * aRand.z) * (1.0 + f * 1.5) * clamp(1.2 - (-mv.z - 20.0) / 30.0, 0.25, 1.0);",
+      "}"
+    ].join("\n"),
+    fragmentShader: [
+      "uniform float uOpacity;",
+      "varying vec3 vCol; varying float vA;",
+      "void main(){",
+      "  float d = length(gl_PointCoord - 0.5);",
+      "  float a = smoothstep(0.5, 0.0, d);",
+      "  gl_FragColor = vec4(vCol, a * a * vA * uOpacity);",
       "}"
     ].join("\n")
   });
-  var auroraScene = new THREE.Scene();
-  auroraScene.add(new THREE.Mesh(quad, auroraMat));
 
-  var rt = new THREE.WebGLRenderTarget(4, 4, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
-  var blitMat = new THREE.ShaderMaterial({
-    uniforms: { tDiffuse: { value: rt.texture } },
-    depthTest: false,
-    depthWrite: false,
-    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
-    fragmentShader: "precision mediump float; varying vec2 vUv; uniform sampler2D tDiffuse; void main(){ gl_FragColor = texture2D(tDiffuse, vUv); }"
-  });
-  var blitScene = new THREE.Scene();
-  blitScene.add(new THREE.Mesh(quad, blitMat));
-
-  // ---------------- 2) NEYRON TARMOQ ----------------
+  var points = new THREE.Points(geo, material);
+  points.frustumCulled = false;
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
-  camera.position.set(0, 0, 38);
+  scene.add(points);
+  var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+  camera.position.set(0, 0, 30);
 
-  var N = isMobile ? 60 : 120;
-  var LINK_DIST = isMobile ? 8 : 7.4;
-  var MOUSE_DIST = 9;
-  var BOX = { x: 30, y: 17, z: 12 };
-
-  var nodes = [];
-  var pointPos = new Float32Array(N * 3);
-  var pointCol = new Float32Array(N * 3);
-  for (var i = 0; i < N; i++) {
-    nodes.push({
-      p: new THREE.Vector3((Math.random() * 2 - 1) * BOX.x, (Math.random() * 2 - 1) * BOX.y, (Math.random() * 2 - 1) * BOX.z),
-      v: new THREE.Vector3((Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.012),
-      glow: 0
-    });
+  // ---------------- bo'limni aniqlash ----------------
+  var sectionEls = SECTIONS.map(function (id) { return document.getElementById(id); });
+  var target = 0;
+  function readSection() {
+    var mid = window.scrollY + window.innerHeight * 0.45;
+    var idx = 0;
+    for (var i = 0; i < K; i++) {
+      var el = sectionEls[i];
+      if (el && el.getBoundingClientRect().top + window.scrollY <= mid) idx = i;
+    }
+    target = idx;
   }
+  window.addEventListener("scroll", readSection, { passive: true });
+  readSection();
 
-  // yumaloq porlaydigan nuqta teksturasi
-  var spriteCanvas = document.createElement("canvas");
-  spriteCanvas.width = spriteCanvas.height = 64;
-  var sctx = spriteCanvas.getContext("2d");
-  var grad = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  grad.addColorStop(0, "rgba(255,255,255,1)");
-  grad.addColorStop(0.25, "rgba(255,255,255,0.85)");
-  grad.addColorStop(1, "rgba(255,255,255,0)");
-  sctx.fillStyle = grad;
-  sctx.fillRect(0, 0, 64, 64);
-  var sprite = new THREE.CanvasTexture(spriteCanvas);
-
-  var pointGeo = new THREE.BufferGeometry();
-  pointGeo.setAttribute("position", new THREE.BufferAttribute(pointPos, 3));
-  pointGeo.setAttribute("color", new THREE.BufferAttribute(pointCol, 3));
-  var points = new THREE.Points(pointGeo, new THREE.PointsMaterial({
-    size: 0.9, map: sprite, vertexColors: true, transparent: true,
-    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
-  }));
-
-  var MAX_SEG = N * 8;
-  var linePos = new Float32Array(MAX_SEG * 6);
-  var lineCol = new Float32Array(MAX_SEG * 6);
-  var lineGeo = new THREE.BufferGeometry();
-  lineGeo.setAttribute("position", new THREE.BufferAttribute(linePos, 3));
-  lineGeo.setAttribute("color", new THREE.BufferAttribute(lineCol, 3));
-  var lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-  }));
-
-  var net = new THREE.Group();
-  net.add(lines);
-  net.add(points);
-  scene.add(net);
-
-  var GOLD = new THREE.Color(0xffb020);
-  var EMBER = new THREE.Color(0xff5a1f);
-  var ROSE = new THREE.Color(0xff3b6e);
-  var tmpCol = new THREE.Color();
-
-  // ---------------- HOLAT: scroll, sichqoncha, o'lcham ----------------
-  var scrollTarget = 0, scrollCur = 0;
-  function readScroll() {
-    var h = document.documentElement.scrollHeight - window.innerHeight;
-    scrollTarget = h > 0 ? clamp(window.scrollY / h, 0, 1) : 0;
-  }
-  window.addEventListener("scroll", readScroll, { passive: true });
-  readScroll();
-
-  var mouse = new THREE.Vector2(0.5, 0.5), mouseSmooth = new THREE.Vector2(0.5, 0.5), mouseActive = 0, mouseSeen = false;
+  // ---------------- sichqoncha ----------------
+  var mouseNdc = new THREE.Vector2(9, 9), mouseOn = false;
   window.addEventListener("mousemove", function (e) {
-    mouse.set(e.clientX / window.innerWidth, 1 - e.clientY / window.innerHeight);
-    mouseSeen = true;
+    mouseNdc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    mouseOn = true;
   }, { passive: true });
-  document.addEventListener("mouseleave", function () { mouseSeen = false; });
-
+  document.addEventListener("mouseleave", function () { mouseOn = false; });
   var raycaster = new THREE.Raycaster();
   var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-  var mouseWorld = new THREE.Vector3();
-  var invNet = new THREE.Matrix4();
+  var hit = new THREE.Vector3();
 
   function resize() {
     var w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    rt.setSize(Math.max(2, Math.round(w * DPR * AURORA_SCALE)), Math.max(2, Math.round(h * DPR * AURORA_SCALE)));
-    auroraUniforms.uRes.value.set(w, h);
   }
   window.addEventListener("resize", resize);
   resize();
 
+  // ---------------- animatsiya ----------------
   var clock = new THREE.Clock();
   var running = true;
+  var weights = [1, 0, 0, 0, 0];
+  var camX = 0, camY = 0;
   document.addEventListener("visibilitychange", function () {
     running = !document.hidden;
     if (running) { clock.getDelta(); requestAnimationFrame(animate); }
@@ -201,91 +247,33 @@
   function animate() {
     if (!running) return;
     requestAnimationFrame(animate);
-
     var dt = Math.min(clock.getDelta(), 0.05);
-    var t = clock.elapsedTime;
-    scrollCur += (scrollTarget - scrollCur) * 0.05;
-    mouseSmooth.lerp(mouse, 0.08);
-    mouseActive = lerp(mouseActive, mouseSeen ? 1 : 0, 0.05);
+    uniforms.uTime.value = clock.elapsedTime;
 
-    // --- aurora ---
-    auroraUniforms.uTime.value = t;
-    auroraUniforms.uScroll.value = scrollCur;
-    auroraUniforms.uMouse.value.copy(mouseSmooth);
-
-    // --- tarmoq: sahna burilishi va kamera ---
-    net.rotation.y = lerp(net.rotation.y, scrollCur * 0.9 + (mouseSmooth.x - 0.5) * 0.25, 0.05);
-    net.rotation.x = lerp(net.rotation.x, (mouseSmooth.y - 0.5) * -0.15 + scrollCur * 0.2, 0.05);
-    camera.position.z = lerp(camera.position.z, 38 - scrollCur * 10, 0.05);
-    net.updateMatrixWorld();
-
-    // kursorning tarmoq koordinatalaridagi o'rni
-    raycaster.setFromCamera({ x: mouseSmooth.x * 2 - 1, y: mouseSmooth.y * 2 - 1 }, camera);
-    raycaster.ray.intersectPlane(plane, mouseWorld);
-    invNet.copy(net.matrixWorld).invert();
-    mouseWorld.applyMatrix4(invNet);
-
-    var palette = tmpCol.copy(GOLD).lerp(ROSE, clamp(scrollCur * 1.4, 0, 1));
-    var speed = 1 + scrollCur * 1.5;
-
-    // nuqtalarni siljitish
-    for (var i = 0; i < N; i++) {
-      var n = nodes[i];
-      n.p.x += n.v.x * speed * dt * 60;
-      n.p.y += n.v.y * speed * dt * 60;
-      n.p.z += n.v.z * speed * dt * 60;
-      if (n.p.x > BOX.x || n.p.x < -BOX.x) n.v.x *= -1;
-      if (n.p.y > BOX.y || n.p.y < -BOX.y) n.v.y *= -1;
-      if (n.p.z > BOX.z || n.p.z < -BOX.z) n.v.z *= -1;
-
-      var md = n.p.distanceTo(mouseWorld);
-      var near = mouseActive * clamp(1 - md / MOUSE_DIST, 0, 1);
-      n.glow = lerp(n.glow, near, 0.12);
-
-      var pulse = 0.75 + 0.3 * Math.sin(t * 1.3 + i * 1.7);
-      var b = pulse + n.glow * 1.4;
-      pointPos[i * 3] = n.p.x; pointPos[i * 3 + 1] = n.p.y; pointPos[i * 3 + 2] = n.p.z;
-      pointCol[i * 3] = palette.r * b; pointCol[i * 3 + 1] = palette.g * b; pointCol[i * 3 + 2] = palette.b * b;
+    // og'irliklarni maqsadli shaklga silliq yaqinlashtiramiz
+    var k = 1 - Math.pow(0.035, dt), sum = 0, maxW = 0;
+    for (var i = 0; i < K; i++) {
+      weights[i] += ((i === target ? 1 : 0) - weights[i]) * k;
+      sum += weights[i];
     }
+    for (var j = 0; j < K; j++) { weights[j] /= sum; maxW = Math.max(maxW, weights[j]); uniforms.uW.value[j] = weights[j]; }
+    uniforms.uMorph.value = Math.pow(1 - maxW, 0.8) * 1.6;
+    // hero'da to'liq yorqin, matnli bo'limlarda vazminroq
+    uniforms.uOpacity.value = 0.75 + weights[0] * 0.25;
 
-    // yaqin nuqtalarni ulash (+ kursorga ulanish)
-    var seg = 0;
-    for (var a = 0; a < N && seg < MAX_SEG; a++) {
-      var pa = nodes[a];
-      for (var c = a + 1; c < N && seg < MAX_SEG; c++) {
-        var pb = nodes[c];
-        var dx = pa.p.x - pb.p.x, dy = pa.p.y - pb.p.y, dz = pa.p.z - pb.p.z;
-        var d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > LINK_DIST * LINK_DIST) continue;
-        var s = (1 - Math.sqrt(d2) / LINK_DIST);
-        var k = s * (0.55 + (pa.glow + pb.glow) * 0.9);
-        writeSeg(seg++, pa.p, pb.p, EMBER, k);
-      }
-      if (pa.glow > 0.05 && seg < MAX_SEG) writeSeg(seg++, pa.p, mouseWorld, GOLD, pa.glow * 0.45);
-    }
-    lineGeo.setDrawRange(0, seg * 2);
-    lineGeo.attributes.position.needsUpdate = true;
-    lineGeo.attributes.color.needsUpdate = true;
-    pointGeo.attributes.position.needsUpdate = true;
-    pointGeo.attributes.color.needsUpdate = true;
+    // sichqoncha
+    raycaster.setFromCamera(mouseNdc, camera);
+    if (raycaster.ray.intersectPlane(plane, hit)) uniforms.uMouse.value.copy(hit);
+    uniforms.uMouseOn.value += ((mouseOn ? 1 : 0) - uniforms.uMouseOn.value) * 0.06;
 
-    // --- chizish: aurora (past o'lcham) -> ekran -> tarmoq ---
-    renderer.setRenderTarget(rt);
-    renderer.render(auroraScene, orthoCam);
-    renderer.setRenderTarget(null);
-    renderer.clear();
-    renderer.render(blitScene, orthoCam);
+    // kameraning yengil parallaksi
+    camX += (mouseNdc.x * (mouseOn ? 1.2 : 0) - camX) * 0.03;
+    camY += (mouseNdc.y * (mouseOn ? 0.8 : 0) - camY) * 0.03;
+    camera.position.x = camX;
+    camera.position.y = camY;
+    camera.lookAt(0, 0, 0);
+
     renderer.render(scene, camera);
   }
-
-  function writeSeg(idx, p1, p2, color, k) {
-    var o = idx * 6;
-    linePos[o] = p1.x; linePos[o + 1] = p1.y; linePos[o + 2] = p1.z;
-    linePos[o + 3] = p2.x; linePos[o + 4] = p2.y; linePos[o + 5] = p2.z;
-    var r = color.r * k, g = color.g * k, b = color.b * k;
-    lineCol[o] = r; lineCol[o + 1] = g; lineCol[o + 2] = b;
-    lineCol[o + 3] = r; lineCol[o + 4] = g; lineCol[o + 5] = b;
-  }
-
   requestAnimationFrame(animate);
 })();

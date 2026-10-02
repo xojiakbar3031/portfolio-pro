@@ -5,16 +5,16 @@
 }
 
 :root {
-  --bg: #0a0603;
-  --surface: #150e08;
-  --surface-2: #201408;
-  --border: #3c2814;
-  --text: #fff6ec;
-  --text-dim: #c7a687;
-  --accent-1: #ff3b1f;
-  --accent-2: #ffb020;
-  --accent-3: #ff2f56;
-  --gradient: linear-gradient(120deg, var(--accent-3), var(--accent-1) 50%, var(--accent-2));
+  --bg: #0b0b0d;
+  --surface: #131316;
+  --surface-2: #1b1b20;
+  --border: #2a2a31;
+  --text: #f4f4f6;
+  --text-dim: #9b9ba7;
+  --accent-1: #6e8bff;
+  --accent-2: #a9b8ff;
+  --accent-3: #4c66f0;
+  --gradient: linear-gradient(120deg, #ffffff 0%, var(--accent-2) 45%, var(--accent-1) 100%);
   --navbar-scrolled: rgba(5, 5, 5, 0.7);
   --shadow-strong: rgba(0, 0, 0, 0.7);
 }
@@ -410,7 +410,8 @@ h1, h2, h3 {
 /* ==================== HERO ==================== */
 .hero {
   position: relative;
-  z-index: 2;
+  /* z-index yo'q: portret (1), 3D kanvas (2) va matn (3) bir qatlam tizimida turadi —
+     zarrachalar halqasi portret ustidan, lekin matn ostidan o'tadi */
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -484,7 +485,7 @@ h1, h2, h3 {
 
 .hero-text {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .hero-portrait {
@@ -502,7 +503,7 @@ h1, h2, h3 {
   content: "";
   position: absolute;
   inset: 10% 0 0 18%;
-  background: radial-gradient(closest-side, rgba(255, 90, 31, 0.35), transparent 70%);
+  background: radial-gradient(closest-side, rgba(110, 139, 255, 0.16), transparent 70%);
   filter: blur(40px);
 }
 
@@ -512,7 +513,7 @@ h1, h2, h3 {
   height: 100%;
   object-fit: cover;
   object-position: 62% 18%;
-  filter: saturate(1.05) contrast(1.06);
+  filter: contrast(1.04);
   /* chap va pastki chekka sahifa foniga silliq erib ketadi */
   -webkit-mask-image:
     linear-gradient(to right, transparent 0%, #000 42%),
@@ -545,8 +546,8 @@ h1, h2, h3 {
   gap: 2px;
   padding: 14px 20px;
   border-radius: 16px;
-  background: rgba(14, 9, 5, 0.55);
-  border: 1px solid rgba(255, 246, 236, 0.14);
+  background: rgba(15, 15, 18, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
@@ -585,8 +586,9 @@ h1, h2, h3 {
   letter-spacing: 0.5px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(14, 9, 5, 0.5);
-  border: 1px solid rgba(255, 176, 32, 0.28);
+  background: rgba(15, 15, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
@@ -698,12 +700,12 @@ h1, h2, h3 {
   z-index: 2;
   width: 100%;
   overflow: hidden;
-  background: var(--gradient);
-  background-size: 200% auto;
-  animation: gradShift 6s ease infinite;
-  padding: 20px 0;
-  transform: rotate(-1.5deg) scale(1.03);
-  margin: -10px 0;
+  background: rgba(11, 11, 13, 0.6);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 18px 0;
 }
 
 .marquee {
@@ -722,14 +724,16 @@ h1, h2, h3 {
 
 .marquee-track span {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #050505;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: var(--text-dim);
   white-space: nowrap;
 }
 
 .marquee-track span.dot {
-  font-size: 18px;
+  font-size: 10px;
+  color: var(--accent-1);
 }
 
 @keyframes marqueeScroll {
@@ -1243,7 +1247,7 @@ h1, h2, h3 {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(5, 3, 1, 0.72);
+  background: rgba(8, 8, 10, 0.72);
   backdrop-filter: blur(6px);
 }
 
@@ -1275,7 +1279,7 @@ h1, h2, h3 {
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: rgba(10, 6, 3, 0.55);
+  background: rgba(10, 10, 12, 0.55);
   color: #fff;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
@@ -1557,7 +1561,7 @@ h1, h2, h3 {
 .contact-form input:focus,
 .contact-form textarea:focus {
   border-color: var(--accent-2);
-  box-shadow: 0 0 0 3px rgba(255, 176, 32, 0.14);
+  box-shadow: 0 0 0 3px rgba(110, 139, 255, 0.14);
 }
 
 .contact-form .btn-fill {
@@ -1664,7 +1668,7 @@ h1, h2, h3 {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  z-index: 2;
   pointer-events: none;
   display: block;
 }
