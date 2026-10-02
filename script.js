@@ -87,21 +87,23 @@ window.addEventListener("scroll", function () {
   navbar.classList.toggle("scrolled", window.scrollY > 10);
 });
 
-// ===== HERO FREYM: sichqoncha bilan yengil 3D tilt =====
-const heroFrame = document.getElementById("heroFrame");
-if (heroFrame && isFinePointer) {
-  heroFrame.addEventListener("mousemove", function (e) {
-    const rect = heroFrame.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const rotateX = ((y - rect.height / 2) / rect.height) * -10;
-    const rotateY = ((x - rect.width / 2) / rect.width) * 10;
-    heroFrame.style.transform =
-      "perspective(1000px) rotateX(" + rotateX + "deg) rotateY(" + (rotateY + 2) + "deg)";
+// ===== HERO PORTRETI: sichqonchaga qarab yengil parallaks =====
+const heroPhoto = document.getElementById("heroPhotoImg");
+if (heroPhoto && isFinePointer && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  let px = 0, py = 0, tx = 0, ty = 0, parallaxOn = false;
+  window.addEventListener("mousemove", function (e) {
+    tx = (e.clientX / window.innerWidth - 0.5) * -18;
+    ty = (e.clientY / window.innerHeight - 0.5) * -12;
+    if (!parallaxOn) { parallaxOn = true; requestAnimationFrame(stepParallax); }
   });
-  heroFrame.addEventListener("mouseleave", function () {
-    heroFrame.style.transform = "perspective(1000px) rotateX(0) rotateY(2deg)";
-  });
+  function stepParallax() {
+    px += (tx - px) * 0.08;
+    py += (ty - py) * 0.08;
+    heroPhoto.style.setProperty("--px", px.toFixed(2) + "px");
+    heroPhoto.style.setProperty("--py", py.toFixed(2) + "px");
+    if (Math.abs(tx - px) > 0.05 || Math.abs(ty - py) > 0.05) requestAnimationFrame(stepParallax);
+    else parallaxOn = false;
+  }
 }
 
 // ===== CUSTOM CURSOR =====
