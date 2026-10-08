@@ -48,3 +48,15 @@ python -m http.server 8000
 
 Add an entry to `WORK_PROJECTS` in `projects.js` (`title`, `description` in uz/ru/en,
 `tags`, `image`, `code`, and optionally `demo`). Put a 1280×800 screenshot in `assets/`.
+
+## CV
+
+The CV PDFs in `assets/` are generated from [`cv/build.py`](cv/build.py) (one template,
+English and Uzbek):
+
+```bash
+python cv/build.py
+# then print each page to PDF with a Chromium-based browser, for example:
+msedge --headless --no-pdf-header-footer --print-to-pdf=assets/Xojiakbar-Saydullayev-CV.pdf cv/cv-en.html
+msedge --headless --no-pdf-header-footer --print-to-pdf=assets/Xojiakbar-Saydullayev-CV-UZ.pdf cv/cv-uz.html
+```

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Xojiakbar Saydullayev — CV</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Segoe UI", "Inter", Arial, sans-serif; color: #15161a; font-size: 9.2pt; line-height: 1.42;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { width: 210mm; height: 297mm; padding: 12mm 15mm 10mm; position: relative; overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+h1 { font-size: 25pt; letter-spacing: -0.6pt; line-height: 1.05; font-weight: 700; }
+.role { color: #3d56d6; font-weight: 600; font-size: 11pt; margin-top: 4pt; }
+.contacts { display: flex; flex-wrap: wrap; gap: 3pt 14pt; margin-top: 9pt; font-size: 8.8pt; color: #3a3c45; }
+.contacts a { border-bottom: 0.6pt solid #c9cde0; }
+.rule { height: 1.4pt; background: #15161a; margin: 10pt 0 2pt; }
+h2 { font-size: 8pt; letter-spacing: 1.6pt; text-transform: uppercase; color: #3d56d6; margin: 10pt 0 5pt; font-weight: 700; }
+.profile { max-width: 168mm; color: #2a2c34; }
+.skills { display: grid; grid-template-columns: 30mm 1fr; gap: 3.5pt 10pt; }
+.skills dt { color: #6b6e7b; font-size: 8.6pt; padding-top: 0.6pt; }
+.project { padding: 5.5pt 0; border-top: 0.6pt solid #dfe1ea; break-inside: avoid; }
+.project.last { border-bottom: 0.6pt solid #dfe1ea; }
+.p-head { display: flex; align-items: baseline; gap: 10pt; }
+.p-title { margin-right: auto; }
+.p-title { font-weight: 700; font-size: 10.6pt; }
+.tag { font-size: 7.6pt; color: #3d56d6; background: #eef1fd; padding: 1.5pt 6pt; border-radius: 3pt; white-space: nowrap; }
+.p-desc { color: #33353e; margin-top: 2pt; }
+.p-links { font-size: 8.2pt; display: flex; gap: 10pt; white-space: nowrap; }
+.p-links a { color: #3d56d6; border-bottom: 0.6pt solid #c9d2f7; }
+.edu { display: flex; justify-content: space-between; border-top: 0.6pt solid #dfe1ea; border-bottom: 0.6pt solid #dfe1ea; padding: 6.5pt 0; }
+.edu b { font-size: 10.2pt; }
+.edu span { color: #6b6e7b; }
+.foot { position: absolute; left: 15mm; right: 15mm; bottom: 7mm; display: flex; justify-content: space-between; font-size: 7.6pt; color: #9a9dab; }
+</style></head>
+<body><div class="page">
+<h1>Xojiakbar Saydullayev</h1>
+<p class="role">AI Engineer &amp; Frontend Developer</p>
+<div class="contacts">
+  <span>Angren, Uzbekistan</span>
+  <a href="mailto:xojiakbarsaydullaev13@gmail.com">xojiakbarsaydullaev13@gmail.com</a>
+  <span>+998 95 313 71 13</span>
+  <a href="https://github.com/xojiakbar3031">github.com/xojiakbar3031</a>
+  <a href="https://t.me/FEL1X333">Telegram: @FEL1X333</a>
+  <a href="https://xojiakbar3031.github.io/portfolio-pro/">xojiakbar3031.github.io/portfolio-pro</a>
+</div>
+<div class="rule"></div>
+<h2>Profile</h2><p class="profile">AI engineer and frontend developer. I build products where an LLM does real work: voice agents with tool calling, speech-to-text pipelines and Telegram bots, wrapped in fast, responsive interfaces built with Next.js and React. I take projects from idea to a deployed application, including a production website that a real client uses today.</p>
+<h2>Skills</h2><dl class="skills"><dt>AI</dt><dd>LLM agents &amp; function calling (Groq, Gemini, OpenAI-compatible APIs), Whisper / faster-whisper speech-to-text, prompt design, text-to-speech</dd><dt>Frontend</dt><dd>Next.js, React, TypeScript, JavaScript (ES6+), Tailwind CSS, HTML5 / CSS3, Three.js, responsive design</dd><dt>Backend &amp; data</dt><dd>Python, Node.js, Prisma ORM, SQLite, REST API integration, Telegram bots</dd><dt>Tools</dt><dd>Git &amp; GitHub, pytest, VS Code, VPS / Vercel deployment, GitHub Pages</dd><dt>Languages</dt><dd>Uzbek (native), Russian, English (A2)</dd></dl>
+<h2>Projects</h2><div class="project"><div class="p-head"><span class="p-title">Angren City Technical College No. 4 — Official Site</span><span class="p-links"><a href="https://angren-texnikum.uz">angren-texnikum.uz ↗</a></span><span class="tag">Client project</span></div><p class="p-desc">Trilingual (UZ/RU/EN) institutional website built with Next.js, Prisma and NextAuth. Online admission system, a complete admin dashboard (programs, staff, news) and automated Telegram notifications. Running live on a VPS.</p></div><div class="project"><div class="p-head"><span class="p-title">Uzbek Voice Agent</span><span class="p-links"><a href="https://github.com/xojiakbar3031/uzbek-voice-agent">Code ↗</a></span><span class="tag">AI · Python</span></div><p class="p-desc">Windows voice assistant that understands Uzbek. Speech is transcribed offline with a fine-tuned Whisper model, then an LLM agent with tool calling opens apps, controls volume and media, sends Telegram messages and answers out loud. Two LLM providers with automatic fallback.</p></div><div class="project"><div class="p-head"><span class="p-title">Audio → Notes</span><span class="p-links"><a href="https://github.com/xojiakbar3031/audio-to-notes">Code ↗</a></span><span class="tag">AI · Next.js</span></div><p class="p-desc">Record or upload audio and get a transcript plus structured notes (summary, key points, action items) in Uzbek, Russian or English. Long files are split in the browser, so recordings of any length work on serverless hosting.</p></div><div class="project"><div class="p-head"><span class="p-title">Forex News Bot</span><span class="p-links"><a href="https://github.com/xojiakbar3031/forex-news-bot">Code ↗</a></span><span class="tag">Python · Telegram</span></div><p class="p-desc">24/7 Telegram bot for high-impact US economic releases: reminders before each event and the actual figure against the forecast, plus crypto price and news alerts. Duplicate-safe state, retries and a pytest suite.</p></div><div class="project"><div class="p-head"><span class="p-title">City Library Platform</span><span class="p-links"><a href="https://github.com/xojiakbar3031/city-library-platform">Code ↗</a></span><span class="tag">Next.js · TypeScript</span></div><p class="p-desc">Library website with a searchable catalog and online membership applications, plus a staff admin panel protected by HMAC-signed sessions and login rate limiting.</p></div><div class="project last"><div class="p-head"><span class="p-title">YouTube Clone · StreamVibe</span><span class="p-links"><a href="https://xojiakbar3031.github.io/youtube-clone/">YouTube demo ↗</a><a href="https://xojiakbar3031.github.io/streamvibe/">StreamVibe demo ↗</a></span><span class="tag">React · JavaScript</span></div><p class="p-desc">Two frontend apps on live data: a YouTube-style SPA (React, Vite) with search, a watch page, comments and history, and a streaming UI in vanilla JavaScript on the TVMaze API.</p></div>
+<h2>Education</h2>
+<div class="edu"><div><b>Frontend Development Course</b><br><span>Shanghai School</span></div><span>2025 – 2026</span></div>
+<div class="foot"><span>Xojiakbar Saydullayev</span><span>CV · 2026</span></div>
+</div></body></html>
