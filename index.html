@@ -1,168 +1,381 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Xojiakbar Saydullayev — AI Engineer & Frontend Developer</title>
-  <meta name="description" content="Xojiakbar Saydullayev — AI engineer and frontend developer. AI-powered web apps, voice assistants and Telegram bots with Next.js, React, Python and LLMs.">
+  <meta name="description" content="Xojiakbar Saydullayev — AI engineer va frontend dasturchi: AI funksiyali veb-ilovalar, ovozli yordamchilar, Telegram botlar. Next.js, React, Python, LLM.">
 
+  <!-- Ijtimoiy tarmoq ko'rinishi (Open Graph / Twitter) -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://xojiakbar3031.github.io/portfolio-pro/">
   <meta property="og:title" content="Xojiakbar Saydullayev — AI Engineer & Frontend Developer">
-  <meta property="og:description" content="AI-powered web apps, voice assistants and Telegram bots.">
+  <meta property="og:description" content="AI funksiyali veb-ilovalar, ovozli yordamchilar va Telegram botlar yaratuvchi AI engineer va frontend dasturchi.">
   <meta property="og:image" content="https://xojiakbar3031.github.io/portfolio-pro/assets/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Xojiakbar Saydullayev — AI Engineer & Frontend Developer">
+  <meta name="twitter:description" content="AI funksiyali veb-ilovalar, ovozli yordamchilar va Telegram botlar yaratuvchi AI engineer va frontend dasturchi.">
   <meta name="twitter:image" content="https://xojiakbar3031.github.io/portfolio-pro/assets/og-image.jpg">
-  <meta name="theme-color" content="#0a0a0b">
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0b'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial, sans-serif' font-size='28' font-weight='700' fill='%23ffffff'%3EXS%3C/text%3E%3C/svg%3E">
+  <!-- Favicon (XS monogrammasi, SVG) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0603'/%3E%3Ctext x='50%25' y='53%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Arial, sans-serif' font-size='30' font-weight='700' fill='%23ff6a1f'%3EXS%3C/text%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <a class="skip" href="#work">Skip to content</a>
 
-  <header class="nav" id="nav">
-    <div class="wrap nav-inner">
-      <a href="#top" class="brand">Xojiakbar<span>.</span></a>
-      <nav class="nav-links" aria-label="Main">
-        <a href="#work" data-i18n="navWork">Work</a>
-        <a href="#about" data-i18n="navAbout">About</a>
-        <a href="#contact" data-i18n="navContact">Contact</a>
+  <!-- SCROLL PROGRESS -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <span class="loader-num" id="loaderNum">0</span>
+      <div class="loader-bar"><div class="loader-bar-fill" id="loaderBarFill"></div></div>
+      <span class="loader-caption" data-i18n="loader">Yuklanmoqda</span>
+    </div>
+  </div>
+
+  <!-- CUSTOM CURSOR -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="cursor-label" id="cursorLabel"><span data-i18n="cursorView">Ko'rish</span></div>
+
+  <!-- 3D ANIMATSIYALI FON -->
+  <canvas class="bg3d" id="bg3d"></canvas>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise"></div>
+
+  <!-- GRADIENT BLOBS (fon) -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- YON SCROLL INDIKATORI -->
+  <nav class="side-nav" id="sideNav" aria-label="Section navigation">
+    <a href="#top" data-label="Home" class="active"></a>
+    <a href="#about" data-label="About"></a>
+    <a href="#work" data-label="Work"></a>
+    <a href="#process" data-label="Process"></a>
+    <a href="#contact" data-label="Contact"></a>
+  </nav>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="#top" class="logo" data-hover>XS<span>.</span></a>
+      <nav class="nav-menu">
+        <a href="#work" class="nav-link" data-hover data-i18n="navWork">Loyihalar</a>
+        <a href="#about" class="nav-link" data-hover data-i18n="navAbout">Men haqimda</a>
+        <a href="#contact" class="nav-link" data-hover data-i18n="navContact">Aloqa</a>
       </nav>
-      <div class="lang" role="group" aria-label="Language">
-        <button data-lang="uz">UZ</button>
-        <button data-lang="ru">RU</button>
-        <button data-lang="en">EN</button>
+      <div class="nav-tools">
+        <div class="lang-switch" id="langSwitch">
+          <button data-lang="uz" class="active">UZ</button>
+          <button data-lang="ru">RU</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <a href="#contact" class="btn-fill btn-fill-sm" data-hover>
+          <span class="btn-fill-bg"></span>
+          <span class="btn-fill-label">
+            <span data-i18n="navHire">Hamkorlik</span>
+            <span data-i18n="navHire">Hamkorlik</span>
+          </span>
+          <svg class="btn-fill-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        </a>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- HERO -->
-    <section class="hero" id="top">
-      <div class="wrap hero-grid">
-        <div class="hero-text">
-          <p class="eyebrow" data-i18n="role">AI Engineer · Frontend Developer</p>
-          <h1 class="hero-name">Xojiakbar<br>Saydullayev</h1>
-          <p class="hero-lead" data-i18n="heroLead">I build AI-powered web apps, voice assistants and Telegram bots.</p>
-          <p class="status"><span class="status-dot"></span><span data-i18n="available">Available for new projects</span></p>
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <span class="avail-badge reveal"><span class="avail-dot"></span><span data-i18n="availText">Freelance ish uchun ochiqman</span></span>
+        <p class="hero-tag reveal" data-i18n="heroTag">AI ENGINEER & FRONTEND DEVELOPER — ANGREN, O'ZBEKISTON</p>
+
+        <h1 class="hero-title" id="heroTitle">
+          <span class="line" data-hover><span class="word" data-i18n="heroLine1">G'oyalarni</span></span>
+          <span class="line" data-hover><span class="word grad-text" data-i18n="heroLine2">aqlli mahsulotga</span></span>
+          <span class="line" data-hover><span class="word" data-i18n="heroLine3">aylantiraman.</span></span>
+        </h1>
+
+        <div class="hero-bottom reveal">
+          <p class="hero-desc" data-i18n="heroDesc">Sun'iy intellekt qo'shilgan veb-ilovalar, ovozli yordamchilar va Telegram botlar yarataman. Tashqi tomoni chiroyli va tez interfeys (Next.js, React), ichida esa LLM, Whisper va real API'lar.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#work" data-i18n="ctaWork">View work</a>
-            <a class="btn" href="assets/Xojiakbar-Saydullayev-CV.pdf" id="cvLink" download data-i18n="ctaCv">Download CV</a>
-          </div>
-          <ul class="socials" aria-label="Links">
-            <li><a href="https://github.com/xojiakbar3031" target="_blank" rel="noopener">GitHub</a></li>
-            <li><a href="https://t.me/FEL1X333" target="_blank" rel="noopener">Telegram</a></li>
-            <li><a href="mailto:xojiakbarsaydullaev13@gmail.com">Email</a></li>
-          </ul>
-        </div>
-
-        <div class="hero-visual" id="heroVisual">
-          <img class="portrait-fallback" src="assets/hero-bw.jpg" alt="Xojiakbar Saydullayev" width="1264" height="1568">
-          <canvas id="portrait3d" aria-hidden="true"></canvas>
-          <p class="hint" data-i18n="hint">Move your cursor over the portrait</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- WORK -->
-    <section class="section" id="work">
-      <div class="wrap">
-        <header class="section-head reveal">
-          <h2 data-i18n="workTitle">Selected work</h2>
-          <p data-i18n="workSub">AI and frontend projects.</p>
-        </header>
-        <div class="projects" id="projects"></div>
-      </div>
-    </section>
-
-    <!-- ABOUT -->
-    <section class="section" id="about">
-      <div class="wrap about-grid">
-        <h2 class="reveal" data-i18n="aboutTitle">About</h2>
-        <div class="about-body">
-          <p class="lead reveal" data-i18n="about1"></p>
-          <p class="reveal" data-i18n="about2"></p>
-
-          <h3 class="sub reveal" data-i18n="expTitle">Experience</h3>
-          <ol class="timeline reveal">
-            <li><span class="t-year">2026</span><div><h4 data-i18n="exp1Title"></h4><p data-i18n="exp1Text"></p></div></li>
-            <li><span class="t-year">2026</span><div><h4 data-i18n="exp2Title"></h4><p data-i18n="exp2Text"></p></div></li>
-            <li><span class="t-year">2025</span><div><h4 data-i18n="exp3Title"></h4><p data-i18n="exp3Text"></p></div></li>
-          </ol>
-
-          <h3 class="sub reveal" data-i18n="skillsTitle">Skills</h3>
-          <div class="skills reveal">
-            <div><h4 data-i18n="skAi">AI</h4><p>LLM agents &amp; tool calling · Whisper / speech-to-text · Groq · Gemini · OpenAI API · prompt design</p></div>
-            <div><h4 data-i18n="skFront">Frontend</h4><p>Next.js · React · TypeScript · JavaScript · Tailwind CSS · Three.js · responsive &amp; accessible UI</p></div>
-            <div><h4 data-i18n="skBack">Backend &amp; tools</h4><p>Python · Node.js / Express · REST APIs · Telegram bots · Git &amp; GitHub · GitHub Pages · VPS</p></div>
+            <a href="#work" class="btn-fill" data-hover>
+              <span class="btn-fill-bg"></span>
+              <span class="btn-fill-label">
+                <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
+                <span data-i18n="heroBtn">Loyihalarni ko'rish</span>
+              </span>
+              <svg class="btn-fill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </a>
+            <a href="assets/Xojiakbar-Saydullayev-CV.pdf" download class="btn-ghost" data-hover>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="cvBtn">CV yuklab olish</span>
+            </a>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- PROCESS -->
-    <section class="section section-tight">
-      <div class="wrap">
-        <h2 class="reveal" data-i18n="procTitle">How I work</h2>
-        <ol class="process reveal">
-          <li><span>01</span><h4 data-i18n="proc1Title"></h4><p data-i18n="proc1Text"></p></li>
-          <li><span>02</span><h4 data-i18n="proc2Title"></h4><p data-i18n="proc2Text"></p></li>
-          <li><span>03</span><h4 data-i18n="proc3Title"></h4><p data-i18n="proc3Text"></p></li>
-          <li><span>04</span><h4 data-i18n="proc4Title"></h4><p data-i18n="proc4Text"></p></li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section class="section" id="contact">
-      <div class="wrap contact-grid">
-        <div class="reveal">
-          <h2 data-i18n="contactTitle">Have a project?</h2>
-          <p class="muted" data-i18n="contactSub">Send a short message and I'll reply within 24 hours.</p>
-          <a class="big-mail" href="mailto:xojiakbarsaydullaev13@gmail.com">xojiakbarsaydullaev13@gmail.com</a>
-          <ul class="socials">
-            <li><a href="https://github.com/xojiakbar3031" target="_blank" rel="noopener">GitHub</a></li>
-            <li><a href="https://t.me/FEL1X333" target="_blank" rel="noopener">Telegram</a></li>
-            <li><a href="https://instagram.com/dv.felix_" target="_blank" rel="noopener">Instagram</a></li>
-          </ul>
+      <div class="hero-portrait" id="heroPortrait" aria-hidden="false">
+        <img src="assets/hero-bw.jpg" alt="Xojiakbar Saydullayev" id="heroPhotoImg" fetchpriority="high">
+        <div class="hero-portrait-card">
+          <span class="hpc-name">Xojiakbar Saydullayev</span>
+          <span class="hpc-role">AI Engineer · Frontend</span>
         </div>
-
-        <form class="form reveal" id="contactForm" action="https://formsubmit.co/ajax/xojiakbarsaydullaev13@gmail.com" method="POST">
-          <input type="hidden" name="_subject" value="Portfolio: new message">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_template" value="table">
-          <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
-          <label><span data-i18n="cfName">Name</span>
-            <input type="text" name="name" required minlength="2" maxlength="80" data-i18n-ph="cfNamePh"></label>
-          <label><span data-i18n="cfContact">Email or Telegram</span>
-            <input type="text" name="contact" required maxlength="120" data-i18n-ph="cfContactPh"></label>
-          <label><span data-i18n="cfMsg">Message</span>
-            <textarea name="message" required minlength="5" maxlength="1500" rows="5" data-i18n-ph="cfMsgPh"></textarea></label>
-          <button class="btn btn-primary" type="submit" data-i18n="cfSend">Send</button>
-          <p class="form-status" id="formStatus" role="status"></p>
-        </form>
+        <ul class="hero-chips" aria-label="Stack">
+          <li style="--i:0">LLM Agents</li>
+          <li style="--i:1">Whisper</li>
+          <li style="--i:2">Next.js</li>
+          <li style="--i:3">React</li>
+        </ul>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>AI ENGINEERING</span><span class="dot">•</span><span>LLM AGENTS</span><span class="dot">•</span><span>SPEECH-TO-TEXT</span><span class="dot">•</span><span>NEXT.JS</span><span class="dot">•</span><span>REACT</span><span class="dot">•</span><span>TELEGRAM BOTS</span><span class="dot">•</span><span>UI / UX</span><span class="dot">•</span>
+      </div>
+      <div class="marquee-track" aria-hidden="true">
+        <span>AI ENGINEERING</span><span class="dot">•</span><span>LLM AGENTS</span><span class="dot">•</span><span>SPEECH-TO-TEXT</span><span class="dot">•</span><span>NEXT.JS</span><span class="dot">•</span><span>REACT</span><span class="dot">•</span><span>TELEGRAM BOTS</span><span class="dot">•</span><span>UI / UX</span><span class="dot">•</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="section about-section" id="about">
+    <div class="section-head">
+      <p class="section-eyebrow reveal" data-i18n="aboutEyebrow">Men haqimda</p>
+      <h2 class="section-title reveal" data-i18n-html="aboutTitle">Bir qo'lda <span class="grad-text">interfeys</span>, ikkinchisida <span class="grad-text">sun'iy intellekt</span>.</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-photo reveal">
+        <img src="assets/hero-bw.jpg" alt="Xojiakbar Saydullayev">
+      </div>
+      <div class="about-text">
+        <p class="about-lead reveal" data-i18n="aboutLead">Men Saydullayev Xojiakbar, Angrendan AI engineer va frontend dasturchiman. Frontend kursida HTML/CSS/JavaScript'dan React va Next.js'gacha o'rgandim, keyin LLM agentlar, nutqni tanish va avtomatlashtirish bilan ishlay boshladim.</p>
+        <p class="about-body reveal" data-i18n="aboutBody">Eng katta mijoz ishim — Angren shahar 4-son Texnikumining rasmiy sayti: uch tilli (UZ/RU/EN), onlayn qabul tizimi, to'liq admin panel va Telegram bildirishnomalari bilan. U hozir VPS serverda ishlab turibdi. AI tomonida o'zbek tilini tushunadigan ovozli agent, audio'dan konspekt tuzadigan ilova va 24/7 ishlaydigan Telegram botlar qurdim.</p>
+
+        <div class="timeline reveal">
+          <div class="tl-item">
+            <span class="tl-year">2025</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl1Title">Frontend kursi</h4>
+              <p data-i18n="tl1Text">HTML, CSS, JavaScript va React asoslarini noldan o'rgandim.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">2026</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl2Title">Amaliy loyihalar</h4>
+              <p data-i18n="tl2Text">YouTube Clone, StreamVibe va kutubxona platformasi — React, Next.js va real API'lar bilan.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">2026</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl3Title">Birinchi real mijoz</h4>
+              <p data-i18n="tl3Text">Angren 4-son Texnikumi sayti — to'liq loyihani noldan qurib, VPS serverga joyladim.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <span class="tl-year">2026</span>
+            <div class="tl-body">
+              <h4 data-i18n="tl4Title">AI yo'nalishi</h4>
+              <p data-i18n="tl4Text">O'zbekcha ovozli agent (Whisper + LLM), Audio → Notes va Telegram botlar.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bento-grid">
+      <div class="bento-card bento-lg tilt reveal">
+        <span class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path><path d="M5 3l.6 1.4L7 5l-1.4.6L5 7l-.6-1.4L3 5l1.4-.6z"></path></svg></span>
+        <h3 data-i18n="skill1Title">AI funksiyalar</h3>
+        <p data-i18n="skill1Text">Mahsulotingizga sun'iy intellekt qo'shaman: chat-yordamchi, hujjat va audio'dan xulosa, ovozli boshqaruv, vositalarni o'zi chaqiradigan LLM agentlar. Groq, Gemini, OpenAI va Whisper bilan.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <span class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1"></path><path d="M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"></path></svg></span>
+        <h3 data-i18n="skill2Title">API integratsiya</h3>
+        <p data-i18n="skill2Text">Tashqi servislarni ulash: to'lov, Telegram, ma'lumot API'lari — ishonchli va xavfsiz.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <span class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="4" width="7" height="16" rx="1.5"></rect><rect x="3" y="7" width="8" height="13" rx="1.5"></rect><path d="M7 20v.01M17.5 16v.01"></path></svg></span>
+        <h3 data-i18n="skill3Title">Responsive dizayn</h3>
+        <p data-i18n="skill3Text">Telefon, planshet, kompyuter — har qanday ekranda bir xil sifat.</p>
+      </div>
+      <div class="bento-card bento-lg tilt reveal">
+        <span class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+        <h3 data-i18n="skill4Title">Animatsiya va mikro-interaksiyalar</h3>
+        <p data-i18n="skill4Text">Sahifani "jonlantiradigan" kichik detallar — scroll animatsiyalari, hover effektlari, silliq o'tishlar. Aynan shu narsalar oddiy saytni esda qoladigan tajribaga aylantiradi.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <span class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4z"></path></svg></span>
+        <h3 data-i18n="skill5Title">Telegram botlar</h3>
+        <p data-i18n="skill5Text">Bildirishnomalar, parserlar, avtomatlashtirish — 24/7 ishlaydigan botlar.</p>
+      </div>
+      <div class="bento-card tilt reveal">
+        <span class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2 0-2.8a2 2 0 0 0-3 0z"></path><path d="M12 15l-3-3a22 22 0 0 1 8-10c3 0 5 2 5 5a22 22 0 0 1-10 8z"></path><path d="M9 12H4s.5-2.8 2-4c1.7-1.3 5 0 5 0"></path><path d="M12 15v5s2.8-.5 4-2c1.3-1.7 0-5 0-5"></path></svg></span>
+        <h3 data-i18n="skill6Title">Tezkor yetkazish</h3>
+        <p data-i18n="skill6Text">G'oyadan tayyor, deploy qilingan saytgacha — qisqa muddatda.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="section work-section" id="work">
+    <div class="section-head">
+      <p class="section-eyebrow reveal" data-i18n="workEyebrow">Tanlangan ishlar</p>
+      <h2 class="section-title reveal" data-i18n-html="workTitle">Loyihalar <span class="grad-text">galereyasi</span></h2>
+    </div>
+
+    <div class="work-list" id="workList"></div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section process-section" id="process">
+    <div class="section-head">
+      <p class="section-eyebrow reveal" data-i18n="procEyebrow">Qanday ishlayman</p>
+      <h2 class="section-title reveal" data-i18n-html="procTitle">G'oyadan <span class="grad-text">jonli saytgacha</span> — 4 qadam.</h2>
+    </div>
+    <div class="process-grid">
+      <div class="proc-step reveal">
+        <span class="proc-num">01</span>
+        <h3 data-i18n="proc1Title">Gaplashamiz</h3>
+        <p data-i18n="proc1Text">Sizga nima kerakligini, maqsad va muddatni aniqlaymiz. Ortiqcha texnik atamalarsiz.</p>
+      </div>
+      <div class="proc-step reveal">
+        <span class="proc-num">02</span>
+        <h3 data-i18n="proc2Title">Dizayn</h3>
+        <p data-i18n="proc2Text">Sahifa tuzilishi va ko'rinishini kelishib olamiz — kod yozishdan oldin.</p>
+      </div>
+      <div class="proc-step reveal">
+        <span class="proc-num">03</span>
+        <h3 data-i18n="proc3Title">Kod</h3>
+        <p data-i18n="proc3Text">Toza, tez va responsive kod. Har bosqichda ko'rsatib boraman.</p>
+      </div>
+      <div class="proc-step reveal">
+        <span class="proc-num">04</span>
+        <h3 data-i18n="proc4Title">Deploy</h3>
+        <p data-i18n="proc4Text">Sayt jonli domenga chiqadi, ishlashini tekshiraman va sizga topshiraman.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section stats-section">
+    <div class="stats-grid">
+      <div class="stat reveal">
+        <span class="stat-num" data-count="7" id="statProjects">0</span><span class="stat-plus grad-text">+</span>
+        <p data-i18n="stat1">Tugallangan loyiha</p>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-num" data-count="6" id="statRepos">0</span>
+        <p data-i18n="stat2">Ochiq manba repo</p>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-num" data-count="8">0</span>
+        <p data-i18n="stat3">Real API integratsiya</p>
+      </div>
+      <div class="stat reveal">
+        <span class="stat-num" data-count="1">0</span>
+        <p data-i18n="stat4">Real mijoz loyihasi</p>
+      </div>
+    </div>
+    <p class="stats-note" id="statsNote" data-i18n="statsNote">Repo soni GitHub'dan jonli olinadi</p>
+  </section>
+
+  <!-- CTA + CONTACT FORM -->
+  <section class="cta-section" id="contact">
+    <div class="cta-glow"></div>
+    <p class="section-eyebrow reveal center" data-i18n="ctaEyebrow">Keyingi qadam</p>
+    <h2 class="cta-title reveal" data-i18n-html="ctaTitle">Loyiha g'oyangiz bormi?<br><span class="grad-text">Kelib gaplashamiz.</span></h2>
+
+    <form class="contact-form reveal" id="contactForm" action="https://formsubmit.co/xojiakbarsaydullaev13@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="Portfolio-pro: yangi murojaat">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <div class="cf-row">
+        <label>
+          <span data-i18n="cfName">Ismingiz</span>
+          <input type="text" name="name" required minlength="2" maxlength="80" data-i18n-ph="cfNamePh" placeholder="Ismingiz">
+        </label>
+        <label>
+          <span data-i18n="cfEmail">Email yoki Telegram</span>
+          <input type="text" name="contact" required maxlength="120" data-i18n-ph="cfEmailPh" placeholder="siz@example.com / @username">
+        </label>
+      </div>
+      <label>
+        <span data-i18n="cfMsg">Xabar</span>
+        <textarea name="message" required minlength="5" maxlength="1500" rows="4" data-i18n-ph="cfMsgPh" placeholder="Loyihangiz haqida qisqacha..."></textarea>
+      </label>
+      <button type="submit" class="btn-fill btn-fill-lg" data-hover>
+        <span class="btn-fill-bg"></span>
+        <span class="btn-fill-label">
+          <span data-i18n="cfSend">Yuborish</span>
+          <span data-i18n="cfSend">Yuborish</span>
+        </span>
+        <svg class="btn-fill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+      </button>
+      <p class="cf-alt" data-i18n-html="cfAlt">yoki to'g'ridan-to'g'ri: <a href="mailto:xojiakbarsaydullaev13@gmail.com">xojiakbarsaydullaev13@gmail.com</a></p>
+    </form>
+
+    <div class="cta-socials reveal">
+      <a href="https://github.com/xojiakbar3031" target="_blank" rel="noopener" data-hover>GitHub</a>
+      <a href="https://t.me/FEL1X333" target="_blank" rel="noopener" data-hover>Telegram</a>
+      <a href="https://instagram.com/dv.felix_" target="_blank" rel="noopener" data-hover>Instagram</a>
+    </div>
+  </section>
 
   <footer class="footer">
-    <div class="wrap footer-inner">
-      <span>© <span id="year">2026</span> Xojiakbar Saydullayev</span>
-      <a href="#top" data-i18n="footerTop">Back to top ↑</a>
-    </div>
+    <p>&copy; <span id="year"></span> Xojiakbar Saydullayev</p>
+    <a href="#top" class="footer-top" data-hover data-i18n="footerTop">Tepaga ↑</a>
   </footer>
 
+  <!-- PROJECT MODAL -->
+  <div class="modal" id="projectModal" aria-hidden="true">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" data-hover aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
+      </button>
+      <div class="modal-media"><img id="modalImg" src="" alt=""></div>
+      <div class="modal-body">
+        <p class="modal-year" id="modalYear"></p>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-tags" id="modalTags"></div>
+        <div class="modal-links">
+          <a href="#" target="_blank" rel="noopener" class="btn-fill btn-fill-sm" id="modalDemo" data-hover>
+            <span class="btn-fill-bg"></span>
+            <span class="btn-fill-label"><span data-i18n="modalDemo">Saytni ochish</span><span data-i18n="modalDemo">Saytni ochish</span></span>
+          </a>
+          <a href="#" target="_blank" rel="noopener" class="modal-code-link" id="modalCode" data-hover>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 1.5A10.5 10.5 0 0 0 8.7 22c.5.1.7-.2.7-.5v-1.7c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1.1-2.8-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.9 1.1a10 10 0 0 1 5.2 0c2-1.4 2.9-1.1 2.9-1.1.6 1.4.2 2.4.1 2.7.7.8 1.1 1.7 1.1 2.8 0 3.9-2.4 4.8-4.7 5.1.4.3.7 1 .7 2v3c0 .3.2.6.7.5A10.5 10.5 0 0 0 12 1.5z"></path></svg>
+            <span data-i18n="modalCode">Kod (GitHub)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="content.js"></script>
+  <script src="bg3d.js"></script>
+  <script src="i18n.js"></script>
   <script src="projects.js"></script>
-  <script src="main.js"></script>
-  <script src="portrait3d.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
