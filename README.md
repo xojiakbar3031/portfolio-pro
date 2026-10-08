@@ -2,27 +2,32 @@
 
 **Live → https://xojiakbar3031.github.io/portfolio-pro/**
 
-Personal site of an **AI engineer & frontend developer**. It's a single page in three
-languages (UZ / RU / EN) with a monochrome design and a scroll-driven Three.js particle
-scene. No build step: plain HTML, CSS and vanilla JavaScript.
+Personal site of an **AI engineer & frontend developer**. It's a minimal single page in
+three languages (UZ / RU / EN) with one centrepiece: a 3D portrait. There is no build
+step, only HTML, CSS and vanilla JavaScript.
 
-## Highlights
+## The 3D portrait
 
-- **Scroll-driven 3D particles** (Three.js, custom shaders). About 7,000 points re-form
-  for each section: an orbit ring around the hero portrait, a sphere, a wave field, a
-  DNA helix, then a globe. All five layouts live on the GPU and blend by weight, so
-  the transitions never jump. The cursor pushes nearby points away. The scene turns
-  off with `prefers-reduced-motion`, without WebGL, and when the tab is hidden.
-- **Editorial hero**: a large black-and-white portrait that fades into the page, with
-  the particle ring drawn between the photo and the text.
-- **Three languages**, switched instantly and remembered. All copy lives in
-  [`i18n.js`](i18n.js).
-- **Projects** are rendered from [`projects.js`](projects.js) and open in a details
-  modal. Projects without a live demo (bots, desktop agent) show only the code link.
-- A working **contact form** (FormSubmit), a **CV download**, live **GitHub repo
-  count** from the API, and an "available for freelance" badge.
-- Micro-interactions: loader, custom cursor, magnetic buttons, word-by-word hero,
-  3D tilt cards, scroll progress and a section indicator.
+[`portrait3d.js`](portrait3d.js) turns a photo into two aligned layers that share a
+depth map built from the image's smoothed luminance:
+
+- a **displaced photo mesh**, so the picture stays sharp but has real volume and
+  shifts in parallax as the cursor tilts it;
+- about **40,000 particles** sampled from the same photo, with the studio backdrop
+  keyed out.
+
+On load the particles fly in from a scattered cloud and resolve into the photo. On
+scroll the photo dissolves back into particles. Rendering pauses when the hero is
+off screen or the tab is hidden. With `prefers-reduced-motion` or without WebGL, a
+plain image is shown instead.
+
+## Everything else
+
+- Minimal layout: neutral dark palette, one accent colour, Inter + JetBrains Mono.
+- Projects are rendered from [`projects.js`](projects.js); all copy lives in
+  [`content.js`](content.js) in three languages, and the choice is remembered.
+- Contact form posts via FormSubmit without leaving the page.
+- Responsive from phones to desktops, with visible focus states.
 
 ## Run locally
 
