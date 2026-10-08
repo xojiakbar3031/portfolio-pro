@@ -49,6 +49,15 @@
   <!-- 3D ANIMATSIYALI FON -->
   <canvas class="bg3d" id="bg3d"></canvas>
 
+  <!-- KINO EFFEKTLARI: vinyetka + bob ko'rsatkichi (bg3d.js yangilaydi) -->
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="hud" aria-hidden="true">
+    <span class="hud-num" id="hudNum">01</span>
+    <span class="hud-total">/ 05</span>
+    <span class="hud-track"><span class="hud-fill" id="hudFill"></span></span>
+    <span class="hud-name" id="hudName">INTRO</span>
+  </div>
+
   <!-- NOISE OVERLAY -->
   <div class="noise"></div>
 
@@ -139,6 +148,7 @@
         </ul>
       </div>
     </div>
+    <a href="#about" class="scroll-cue" aria-label="Scroll"><span>SCROLL</span><i></i></a>
   </section>
 
   <!-- MARQUEE -->
