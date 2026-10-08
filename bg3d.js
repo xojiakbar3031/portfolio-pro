@@ -1,15 +1,15 @@
 // ============================================================
-// 3D FON — scroll bilan shakl o'zgartiradigan zarrachalar (Three.js)
+// KINEMATIK 3D SAHNA (Three.js)
 // ------------------------------------------------------------
-// ~7000 ta nuqta har bir bo'limda boshqa shaklga yig'iladi:
-//   hero    -> portret atrofida aylanuvchi orbita halqasi
-//   about   -> sfera
-//   work    -> to'lqinli tekislik
-//   process -> qo'sh spiral (DNK)
-//   contact -> katta globus
-// Har bir nuqtaning 5 ta shakldagi o'rni GPU'ga oldindan beriladi,
-// bo'limlar orasida og'irliklar silliq almashadi — sakrashlarsiz morf.
-// Sichqoncha yaqinidagi nuqtalar chetga suriladi va ko'k rangga kiradi.
+// Butun sayt — bitta 3D dunyo. Scroll kamerani shu dunyo ichida
+// oldindan chizilgan yo'l bo'ylab uchiradi:
+//   hero    -> portret atrofidagi giroskop halqalari, kamera ularni aylanadi
+//   about   -> buralgan tunnel ichidan uchish
+//   work    -> fazoda suzuvchi ramkalar orasidan o'tish
+//   process -> to'lqinli relyef ustidan past uchish, oldinda 4 nur ustuni
+//   contact -> ko'tarilib, katta globusni aylanib o'tish
+// Kamera hech qachon qotib turmaydi: sekin tebranadi, og'adi (roll),
+// sichqonchaga ergashadi, tez scroll qilinganda ko'rish burchagi kengayadi.
 // O'chadigan hollar: WebGL yo'q / "reduced motion" / tab yashiringan.
 // ============================================================
 (function () {
@@ -19,211 +19,293 @@
 
   var renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: false, powerPreference: "high-performance" });
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
   } catch (e) { return; }
-  var PR = Math.min(window.devicePixelRatio || 1, 1.75);
-  renderer.setPixelRatio(PR);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
   renderer.setClearColor(0x000000, 0);
   document.body.classList.add("has-bg3d");
 
   var isMobile = window.matchMedia("(max-width: 1000px)").matches;
-  var N = isMobile ? 3600 : 7000;
-  var SECTIONS = ["top", "about", "work", "process", "contact"];
-  var K = SECTIONS.length;
+  var WHITE = 0xdfe4ff, BLUE = 0x6e8bff;
 
-  // ---------------- tasodifiy yordamchilar ----------------
-  function gauss() {
-    var u = 1 - Math.random(), v = Math.random();
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x0b0b0d, 0.017);
+  var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
+
+  // ---------------- yordamchilar ----------------
+  function lineMat(color, opacity) {
+    return new THREE.LineBasicMaterial({
+      color: color, transparent: true, opacity: opacity,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
   }
-  var tmpV = new THREE.Vector3();
-  var tmpE = new THREE.Euler();
-
-  // ---------------- shakllar ----------------
-  // har biri: { pos: Float32Array(N*3), center, axis, spin }
-  function orbitRing(center, R, tilt) {
-    var pos = new Float32Array(N * 3);
-    tmpE.set(tilt[0], 0, tilt[1]);
-    for (var i = 0; i < N; i++) {
-      var a = Math.random() * Math.PI * 2, r, y;
-      var k = Math.random();
-      if (k < 0.72) { r = R + gauss() * 0.28; y = gauss() * 0.18; }          // asosiy halqa
-      else if (k < 0.9) { r = R * 1.32 + gauss() * 0.5; y = gauss() * 0.35; } // ikkinchi, xira orbita
-      else { r = R * (0.6 + Math.random() * 1.2); y = gauss() * 2.2; }        // atrofdagi chang
-      tmpV.set(Math.cos(a) * r, y, Math.sin(a) * r).applyEuler(tmpE).add(center);
-      pos[i * 3] = tmpV.x; pos[i * 3 + 1] = tmpV.y; pos[i * 3 + 2] = tmpV.z;
+  function polygon(radius, sides, mat) {
+    var pts = [];
+    for (var i = 0; i < sides; i++) {
+      var a = (i / sides) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0));
     }
-    var axis = new THREE.Vector3(0, 1, 0).applyEuler(tmpE).normalize();
-    return { pos: pos, center: center, axis: axis, spin: 0.18 };
+    return new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), mat);
+  }
+  function rect(w, h, mat) {
+    var x = w / 2, y = h / 2;
+    var pts = [new THREE.Vector3(-x, -y, 0), new THREE.Vector3(x, -y, 0), new THREE.Vector3(x, y, 0), new THREE.Vector3(-x, y, 0)];
+    return new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), mat);
+  }
+  // yumaloq porlaydigan nuqta teksturasi
+  var sprite = (function () {
+    var c = document.createElement("canvas");
+    c.width = c.height = 64;
+    var x = c.getContext("2d");
+    var g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.3, "rgba(255,255,255,0.7)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = g;
+    x.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+  })();
+  function pointsMat(color, size, opacity) {
+    return new THREE.PointsMaterial({
+      color: color, size: size, map: sprite, transparent: true, opacity: opacity,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+    });
   }
 
-  function sphere(center, R, spin) {
-    var pos = new Float32Array(N * 3);
-    var golden = Math.PI * (3 - Math.sqrt(5));
-    for (var i = 0; i < N; i++) {
-      var y = 1 - (i / (N - 1)) * 2;
-      var rr = Math.sqrt(1 - y * y);
-      var th = golden * i;
-      var shell = Math.random() < 0.86 ? 1 + gauss() * 0.012 : Math.random() * 0.9;
-      pos[i * 3] = center.x + Math.cos(th) * rr * R * shell;
-      pos[i * 3 + 1] = center.y + y * R * shell;
-      pos[i * 3 + 2] = center.z + Math.sin(th) * rr * R * shell;
+  // zonalar: [obyekt, p boshlanishi, p tugashi] — kamera uzoqda bo'lsa chizilmaydi
+  var zones = [];
+  function zone(o, from, to) { zones.push([o, from, to]); return o; }
+
+  var spinners = []; // har kadrda aylantiriladigan obyektlar: { o, x, y, z }
+  function spin(o, x, y, z) { spinners.push({ o: o, x: x, y: y, z: z }); return o; }
+
+  // ================= 1) HERO: giroskop =================
+  var CORE = isMobile ? new THREE.Vector3(0, 6.5, 0) : new THREE.Vector3(13.5, 4.2, 0);
+  var core = new THREE.Group();
+  core.position.copy(CORE);
+  scene.add(core);
+  zone(core, -1, 1.25);
+  var coreScale = isMobile ? 0.72 : 1;
+  [
+    { r: 7.6, tilt: [1.18, 0, -0.32], color: WHITE, op: 0.8, speed: 0.22 },
+    { r: 9.0, tilt: [0.55, 0.5, 0.9], color: BLUE, op: 0.9, speed: -0.16 },
+    { r: 10.6, tilt: [-0.95, 0.25, 0.3], color: WHITE, op: 0.4, speed: 0.11 }
+  ].forEach(function (cfg) {
+    var holder = new THREE.Group();
+    holder.rotation.set(cfg.tilt[0], cfg.tilt[1], cfg.tilt[2]);
+    var ring = polygon(cfg.r * coreScale, 160, lineMat(cfg.color, cfg.op));
+    // halqa bo'ylab yuguruvchi "elektronlar"
+    var dots = new Float32Array(9);
+    for (var i = 0; i < 3; i++) {
+      var a = (i / 3) * Math.PI * 2;
+      dots[i * 3] = Math.cos(a) * cfg.r * coreScale; dots[i * 3 + 1] = Math.sin(a) * cfg.r * coreScale;
     }
-    return { pos: pos, center: center, axis: new THREE.Vector3(0.15, 1, 0).normalize(), spin: spin };
-  }
-
-  function wavePlane(center, W, D) {
-    var pos = new Float32Array(N * 3);
-    var cols = Math.round(Math.sqrt(N * (W / D))), rows = Math.ceil(N / cols);
-    for (var i = 0; i < N; i++) {
-      var cx = i % cols, cz = Math.floor(i / cols);
-      var x = (cx / (cols - 1) - 0.5) * W;
-      var z = (cz / (rows - 1) - 0.5) * D;
-      var y = Math.sin(x * 0.28) * Math.cos(z * 0.33) * 1.8 + Math.sin((x + z) * 0.12) * 1.2;
-      pos[i * 3] = center.x + x; pos[i * 3 + 1] = center.y + y; pos[i * 3 + 2] = center.z + z;
+    var dg = new THREE.BufferGeometry();
+    dg.setAttribute("position", new THREE.BufferAttribute(dots, 3));
+    var glowN = 220, glow = new Float32Array(glowN * 3);
+    for (var q = 0; q < glowN; q++) {
+      var ga = (q / glowN) * Math.PI * 2;
+      glow[q * 3] = Math.cos(ga) * cfg.r * coreScale; glow[q * 3 + 1] = Math.sin(ga) * cfg.r * coreScale;
     }
-    return { pos: pos, center: center, axis: new THREE.Vector3(0, 1, 0), spin: 0.03 };
-  }
-
-  function helix(center, L, R) {
-    var pos = new Float32Array(N * 3);
-    for (var i = 0; i < N; i++) {
-      var x = (Math.random() - 0.5) * L, a = x * 0.42, y, z;
-      if (Math.random() < 0.8) {                       // ikki ip
-        var strand = Math.random() < 0.5 ? 0 : Math.PI;
-        y = Math.cos(a + strand) * R + gauss() * 0.12;
-        z = Math.sin(a + strand) * R + gauss() * 0.12;
-      } else {                                          // ular orasidagi "zinapoyalar"
-        x = Math.round(x / 1.5) * 1.5; a = x * 0.42;
-        var t = Math.random() * 2 - 1;
-        y = Math.cos(a) * R * t; z = Math.sin(a) * R * t;
-      }
-      pos[i * 3] = center.x + x; pos[i * 3 + 1] = center.y + y; pos[i * 3 + 2] = center.z + z;
-    }
-    return { pos: pos, center: center, axis: new THREE.Vector3(1, 0, 0), spin: 0.35 };
-  }
-
-  // kamera z=30, fov=50 -> ekran yarim balandligi ~14 birlik
-  var shapes = isMobile ? [
-    orbitRing(new THREE.Vector3(0, 6.5, 0), 6.5, [1.2, -0.25]),
-    sphere(new THREE.Vector3(0, 0, -4), 7, 0.12),
-    wavePlane(new THREE.Vector3(0, -7, -4), 34, 26),
-    helix(new THREE.Vector3(0, 0, -6), 34, 2.6),
-    sphere(new THREE.Vector3(0, 0, -6), 9, 0.08)
-  ] : [
-    orbitRing(new THREE.Vector3(10.5, 3.2, 1), 8.6, [1.18, -0.32]),
-    sphere(new THREE.Vector3(12.5, -0.5, -2), 7.2, 0.12),
-    wavePlane(new THREE.Vector3(0, -8.5, -6), 64, 34),
-    helix(new THREE.Vector3(0, -1, -4), 56, 3.2),
-    sphere(new THREE.Vector3(0, 0, -8), 11.5, 0.07)
-  ];
-
-  // ---------------- geometriya ----------------
-  var geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.BufferAttribute(shapes[0].pos.slice(), 3));
-  for (var s = 0; s < K; s++) geo.setAttribute("p" + s, new THREE.BufferAttribute(shapes[s].pos, 3));
-  var rnd = new Float32Array(N * 3);
-  for (var i = 0; i < rnd.length; i++) rnd[i] = Math.random();
-  geo.setAttribute("aRand", new THREE.BufferAttribute(rnd, 3));
-
-  var uniforms = {
-    uTime: { value: 0 },
-    uW: { value: [1, 0, 0, 0, 0] },
-    uC: { value: shapes.map(function (sh) { return sh.center; }) },
-    uAx: { value: shapes.map(function (sh) { return sh.axis; }) },
-    uSpin: { value: shapes.map(function (sh) { return sh.spin; }) },
-    uMorph: { value: 0 },
-    uMouse: { value: new THREE.Vector3(999, 999, 0) },
-    uMouseOn: { value: 0 },
-    uSize: { value: isMobile ? 2.6 : 2.2 },
-    uPR: { value: PR },
-    uOpacity: { value: 1 }
-  };
-
-  var material = new THREE.ShaderMaterial({
-    uniforms: uniforms,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexShader: [
-      "attribute vec3 p0; attribute vec3 p1; attribute vec3 p2; attribute vec3 p3; attribute vec3 p4;",
-      "attribute vec3 aRand;",
-      "uniform float uW[5]; uniform vec3 uC[5]; uniform vec3 uAx[5]; uniform float uSpin[5];",
-      "uniform float uTime; uniform float uMorph; uniform vec3 uMouse; uniform float uMouseOn;",
-      "uniform float uSize; uniform float uPR;",
-      "varying vec3 vCol; varying float vA;",
-      "vec3 rot(vec3 p, vec3 c, vec3 ax, float a){",
-      "  p -= c; float s = sin(a); float co = cos(a);",
-      "  return c + p * co + cross(ax, p) * s + ax * dot(ax, p) * (1.0 - co);",
-      "}",
-      "void main(){",
-      "  float t = uTime;",
-      "  vec3 pos = uW[0] * rot(p0, uC[0], uAx[0], t * uSpin[0])",
-      "          + uW[1] * rot(p1, uC[1], uAx[1], t * uSpin[1])",
-      "          + uW[2] * rot(p2, uC[2], uAx[2], t * uSpin[2])",
-      "          + uW[3] * rot(p3, uC[3], uAx[3], t * uSpin[3])",
-      "          + uW[4] * rot(p4, uC[4], uAx[4], t * uSpin[4]);",
-      // tirik "nafas" va to'lqin tekisligidagi harakat
-      "  pos += vec3(sin(t * 0.7 + aRand.x * 6.28), cos(t * 0.6 + aRand.y * 6.28), sin(t * 0.5 + aRand.z * 6.28)) * 0.08;",
-      "  pos.y += uW[2] * sin(pos.x * 0.25 + t * 0.9) * 0.6;",
-      // morf paytida nuqtalar biroz tarqaladi
-      "  vec3 dir = normalize(aRand - 0.5 + 0.0001);",
-      "  pos += dir * uMorph * (3.0 + aRand.y * 5.0);",
-      // sichqoncha: yaqin nuqtalarni itaradi
-      "  vec2 d = pos.xy - uMouse.xy; float l = length(d);",
-      "  float f = uMouseOn * (1.0 - smoothstep(0.0, 4.2, l));",
-      "  pos.xy += normalize(d + 0.0001) * f * 2.4; pos.z += f * 1.5;",
-      "  vec4 mv = modelViewMatrix * vec4(pos, 1.0);",
-      "  gl_Position = projectionMatrix * mv;",
-      "  gl_PointSize = uSize * (0.55 + aRand.y * 0.9) * uPR * (30.0 / -mv.z);",
-      "  vec3 white = vec3(0.86, 0.89, 1.0); vec3 blue = vec3(0.43, 0.55, 1.0);",
-      "  vCol = mix(white, blue, clamp(aRand.x * 0.75 + f, 0.0, 1.0));",
-      "  vA = (0.25 + 0.75 * aRand.z) * (1.0 + f * 1.5) * clamp(1.2 - (-mv.z - 20.0) / 30.0, 0.25, 1.0);",
-      "}"
-    ].join("\n"),
-    fragmentShader: [
-      "uniform float uOpacity;",
-      "varying vec3 vCol; varying float vA;",
-      "void main(){",
-      "  float d = length(gl_PointCoord - 0.5);",
-      "  float a = smoothstep(0.5, 0.0, d);",
-      "  gl_FragColor = vec4(vCol, a * a * vA * uOpacity);",
-      "}"
-    ].join("\n")
+    var gg = new THREE.BufferGeometry();
+    gg.setAttribute("position", new THREE.BufferAttribute(glow, 3));
+    var spinner = new THREE.Group();
+    spinner.add(ring);
+    spinner.add(new THREE.Points(gg, pointsMat(cfg.color, 0.28, cfg.op * 0.7)));
+    spinner.add(new THREE.Points(dg, pointsMat(cfg.color, 0.9, 0.95)));
+    holder.add(spinner);
+    core.add(holder);
+    spin(spinner, 0, 0, cfg.speed);
+    spin(holder, 0.03, 0.05, 0);
   });
 
-  var points = new THREE.Points(geo, material);
-  points.frustumCulled = false;
-  var scene = new THREE.Scene();
-  scene.add(points);
-  var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-  camera.position.set(0, 0, 30);
-
-  // ---------------- bo'limni aniqlash ----------------
-  var sectionEls = SECTIONS.map(function (id) { return document.getElementById(id); });
-  var target = 0;
-  function readSection() {
-    var mid = window.scrollY + window.innerHeight * 0.45;
-    var idx = 0;
-    for (var i = 0; i < K; i++) {
-      var el = sectionEls[i];
-      if (el && el.getBoundingClientRect().top + window.scrollY <= mid) idx = i;
+  // ================= chang (butun yo'l bo'ylab) =================
+  (function () {
+    var n = isMobile ? 1300 : 2600;
+    var pos = new Float32Array(n * 3);
+    for (var i = 0; i < n; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 100;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 60;
+      pos[i * 3 + 2] = 45 - Math.random() * 440;
     }
-    target = idx;
+    var g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(g, pointsMat(WHITE, 0.32, 0.55)));
+  })();
+
+  // ================= 2) ABOUT: buralgan tunnel =================
+  var tunnel = new THREE.Group();
+  scene.add(tunnel);
+  zone(tunnel, 0.3, 2.05);
+  var frames = [];
+  for (var f = 0; f < 30; f++) {
+    var blue = f % 3 === 0;
+    var frame = polygon(9, 6, lineMat(blue ? BLUE : WHITE, blue ? 0.95 : 0.45));
+    frame.position.z = -28 - f * 3.8;
+    frame.rotation.z = f * 0.13;
+    if (blue) frame.add(polygon(5.2, 6, lineMat(BLUE, 0.35)));
+    tunnel.add(frame);
+    frames.push(frame);
   }
-  window.addEventListener("scroll", readSection, { passive: true });
-  readSection();
+
+  // ================= 3) WORK: suzuvchi ramkalar =================
+  var panels = [];
+  (function () {
+    var rnd = function (a, b) { return a + Math.random() * (b - a); };
+    for (var i = 0; i < 16; i++) {
+      var w = rnd(6, 13), h = w * rnd(0.55, 0.7);
+      var g = new THREE.Group();
+      var blue = i % 4 === 0;
+      g.add(rect(w, h, lineMat(blue ? BLUE : WHITE, blue ? 0.95 : 0.6)));
+      // ekran "sarlavha chizig'i" va ichki chiziqlar — interfeys silueti
+      var bar = rect(w, h * 0.12, lineMat(blue ? BLUE : WHITE, 0.25));
+      bar.position.y = h * 0.44;
+      g.add(bar);
+      var inner = rect(w * 0.42, h * 0.5, lineMat(WHITE, 0.16));
+      inner.position.set(-w * 0.22, -h * 0.08, 0);
+      g.add(inner);
+      g.position.set(-36 + (i % 8) * 10.5 + rnd(-2, 2), rnd(-7, 9), -172 - Math.floor(i / 8) * 12 - rnd(0, 8));
+      g.rotation.set(rnd(-0.15, 0.15), rnd(-0.5, 0.5), rnd(-0.06, 0.06));
+      g.userData = { y: g.position.y, phase: Math.random() * 6.28, ry: g.rotation.y };
+      scene.add(g);
+      zone(g, 1.45, 3.0);
+      panels.push(g);
+    }
+  })();
+
+  // ================= 4) PROCESS: relyef + nur ustunlari =================
+  (function () {
+    var geo = new THREE.PlaneGeometry(170, 120, 68, 48);
+    geo.rotateX(-Math.PI / 2);
+    var p = geo.attributes.position;
+    for (var i = 0; i < p.count; i++) {
+      var x = p.getX(i), z = p.getZ(i);
+      p.setY(i, Math.sin(x * 0.11) * Math.cos(z * 0.13) * 2.6 + Math.sin((x + z) * 0.05) * 2.2);
+    }
+    var terrain = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+      color: BLUE, wireframe: true, transparent: true, opacity: 0.15,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    terrain.position.set(0, -7, -265);
+    scene.add(terrain);
+    zone(terrain, 2.55, 4.1);
+
+    for (var k = 0; k < 4; k++) {
+      var beam = new THREE.Mesh(
+        new THREE.BoxGeometry(0.22, 30, 0.22),
+        new THREE.MeshBasicMaterial({ color: k % 2 ? WHITE : BLUE, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false })
+      );
+      beam.position.set(-21 + k * 14, 8, -282);
+      scene.add(beam);
+      zone(beam, 2.55, 3.9);
+      var base = polygon(2.2, 40, lineMat(k % 2 ? WHITE : BLUE, 0.6));
+      base.rotation.x = Math.PI / 2;
+      base.position.set(beam.position.x, -5.5, -282);
+      scene.add(base);
+      zone(base, 2.55, 3.9);
+      spin(base, 0, 0, 0.5);
+    }
+  })();
+
+  // ================= 5) CONTACT: globus =================
+  var GLOBE = new THREE.Vector3(0, 6, -352);
+  (function () {
+    var g = new THREE.Group();
+    g.position.copy(GLOBE);
+    var ico = new THREE.IcosahedronGeometry(12, 2);
+    g.add(new THREE.Mesh(ico, new THREE.MeshBasicMaterial({
+      color: WHITE, wireframe: true, transparent: true, opacity: 0.26, blending: THREE.AdditiveBlending, depthWrite: false
+    })));
+    g.add(new THREE.Points(ico, pointsMat(BLUE, 0.55, 0.9)));
+    scene.add(g);
+    zone(g, 3.05, 9);
+    spin(g, 0.02, 0.09, 0);
+    [[16, 1.35, 0.2, BLUE, 0.6], [19.5, 1.1, -0.6, WHITE, 0.3]].forEach(function (c) {
+      var ring = polygon(c[0], 180, lineMat(c[3], c[4]));
+      var holder = new THREE.Group();
+      holder.position.copy(GLOBE);
+      holder.rotation.set(c[1], 0, c[2]);
+      holder.add(ring);
+      scene.add(holder);
+      zone(holder, 3.05, 9);
+      spin(ring, 0, 0, 0.12);
+    });
+  })();
+
+  // ================= KAMERA YO'LI =================
+  // p: 0 hero, 1 about, 2 work, 3 process, 4 contact (kasrlar — oraliq nuqtalar)
+  var KEYS = isMobile ? [
+    [0.0, [0, 3, 34], [0, 5.5, 0]],
+    [0.55, [14, 8, 14], [0, 6.5, 0]],
+    [1.0, [3, 1, -34], [0, 0, -70]],
+    [1.6, [0, 0, -100], [0, 0, -135]],
+    [2.0, [-18, 2, -146], [-10, 1, -180]],
+    [2.6, [18, 2, -146], [10, 1, -180]],
+    [3.0, [0, 4, -208], [0, -1, -262]],
+    [3.6, [0, 8, -262], [0, 5, -330]],
+    [4.0, [-14, 9, -312], [0, 6, -352]],
+    [4.4, [14, 12, -314], [0, 6, -352]]
+  ] : [
+    [0.0, [0, 1.2, 30], [5, 1.6, 0]],
+    [0.55, [24, 7, 13], [13.5, 4.2, 0]],
+    [1.0, [4, 1, -34], [0, 0, -70]],
+    [1.6, [0, 0, -100], [0, 0, -135]],
+    [2.0, [-24, 2.5, -150], [-15, 1, -182]],
+    [2.6, [24, 2.5, -150], [15, 1, -182]],
+    [3.0, [0, 4, -212], [0, -1, -262]],
+    [3.6, [0, 8, -268], [0, 5, -330]],
+    [4.0, [-17, 9, -318], [0, 6, -352]],
+    [4.4, [17, 12, -322], [0, 6, -352]]
+  ];
+  var v3 = function (a) { return new THREE.Vector3(a[0], a[1], a[2]); };
+  var posCurve = new THREE.CatmullRomCurve3(KEYS.map(function (k) { return v3(k[1]); }), false, "catmullrom", 0.35);
+  var lookCurve = new THREE.CatmullRomCurve3(KEYS.map(function (k) { return v3(k[2]); }), false, "catmullrom", 0.35);
+  var P_MAX = KEYS[KEYS.length - 1][0];
+
+  // p qiymatini egri chiziq parametriga (0..1) o'giradi
+  function paramFor(p) {
+    p = Math.max(0, Math.min(P_MAX, p));
+    for (var i = 0; i < KEYS.length - 1; i++) {
+      var a = KEYS[i][0], b = KEYS[i + 1][0];
+      if (p <= b) return (i + (p - a) / (b - a)) / (KEYS.length - 1);
+    }
+    return 1;
+  }
+
+  // ---------------- scroll -> p ----------------
+  var ids = ["top", "about", "work", "process", "contact"];
+  var els = ids.map(function (id) { return document.getElementById(id); });
+  var pTarget = 0, p = 0;
+  function readScroll() {
+    var vh = window.innerHeight;
+    var y = window.scrollY + vh * 0.35 * Math.min(1, window.scrollY / (vh * 0.5));
+    var tops = els.map(function (el) { return el ? el.getBoundingClientRect().top + window.scrollY : 0; });
+    tops[0] = 0;
+    var end = document.documentElement.scrollHeight - vh * 0.65;
+    var val = 0;
+    for (var i = 0; i < tops.length; i++) {
+      var next = i < tops.length - 1 ? tops[i + 1] : end;
+      if (y >= tops[i]) {
+        var span = Math.max(1, next - tops[i]);
+        var extra = i === tops.length - 1 ? P_MAX - i : 1;
+        val = i + Math.min(1, (y - tops[i]) / span) * extra;
+      }
+    }
+    pTarget = val;
+  }
+  window.addEventListener("scroll", readScroll, { passive: true });
+  window.addEventListener("resize", readScroll);
+  readScroll();
+  // test/demo uchun: sahifa URL'ida #p=2.3 bo'lsa kamera o'sha nuqtada turadi
+  var forced = /[#&]p=([\d.]+)/.exec(location.hash);
+  if (forced) { pTarget = p = parseFloat(forced[1]); window.removeEventListener("scroll", readScroll); }
 
   // ---------------- sichqoncha ----------------
-  var mouseNdc = new THREE.Vector2(9, 9), mouseOn = false;
+  var mx = 0, my = 0, mxS = 0, myS = 0;
   window.addEventListener("mousemove", function (e) {
-    mouseNdc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
-    mouseOn = true;
+    mx = e.clientX / window.innerWidth - 0.5;
+    my = e.clientY / window.innerHeight - 0.5;
   }, { passive: true });
-  document.addEventListener("mouseleave", function () { mouseOn = false; });
-  var raycaster = new THREE.Raycaster();
-  var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-  var hit = new THREE.Vector3();
 
   function resize() {
     var w = window.innerWidth, h = window.innerHeight;
@@ -237,41 +319,67 @@
   // ---------------- animatsiya ----------------
   var clock = new THREE.Clock();
   var running = true;
-  var weights = [1, 0, 0, 0, 0];
-  var camX = 0, camY = 0;
+  var camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
+  var fov = 50, roll = 0;
   document.addEventListener("visibilitychange", function () {
     running = !document.hidden;
     if (running) { clock.getDelta(); requestAnimationFrame(animate); }
   });
 
+  function smooth(a, b, x) { x = Math.max(0, Math.min(1, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
+
   function animate() {
     if (!running) return;
     requestAnimationFrame(animate);
     var dt = Math.min(clock.getDelta(), 0.05);
-    uniforms.uTime.value = clock.elapsedTime;
+    var t = clock.elapsedTime;
 
-    // og'irliklarni maqsadli shaklga silliq yaqinlashtiramiz
-    var k = 1 - Math.pow(0.035, dt), sum = 0, maxW = 0;
-    for (var i = 0; i < K; i++) {
-      weights[i] += ((i === target ? 1 : 0) - weights[i]) * k;
-      sum += weights[i];
+    // scroll'ni yumshatamiz — kamera "og'irlik" bilan harakatlanadi
+    var prev = p;
+    p += (pTarget - p) * (1 - Math.pow(0.012, dt));
+    var vel = (p - prev) / Math.max(dt, 0.001); // bo'lim/soniya
+
+    var u = paramFor(p);
+    posCurve.getPoint(u, camPos);
+    lookCurve.getPoint(u, camLook);
+
+    // kamera hech qachon qotib turmaydi: sekin tebranish + sichqoncha
+    mxS += (mx - mxS) * 0.04; myS += (my - myS) * 0.04;
+    camPos.x += Math.sin(t * 0.31) * 0.9 + mxS * 2.4;
+    camPos.y += Math.cos(t * 0.27) * 0.55 - myS * 1.5;
+    camPos.z += Math.sin(t * 0.19) * 0.7;
+    camLook.x += Math.sin(t * 0.23 + 1.3) * 0.35;
+    camLook.y += Math.cos(t * 0.21) * 0.25;
+
+    camera.position.copy(camPos);
+    camera.lookAt(camLook);
+    // og'ish: sekin "nafas" + tunnelda buralish + tezlikka bog'liq burilish
+    var targetRoll = Math.sin(t * 0.22) * 0.03 + smooth(0.8, 1.2, p) * (1 - smooth(1.5, 1.9, p)) * Math.sin(p * 6.0) * 0.22 + Math.max(-0.12, Math.min(0.12, vel * 0.08));
+    roll += (targetRoll - roll) * 0.08;
+    camera.rotateZ(roll);
+    // tez harakatda ko'rish burchagi kengayadi ("warp")
+    var targetFov = 50 + Math.min(16, Math.abs(vel) * 9);
+    fov += (targetFov - fov) * 0.1;
+    if (Math.abs(camera.fov - fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
+
+    // faqat kameraga yaqin zonalar chiziladi
+    for (var z = 0; z < zones.length; z++) zones[z][0].visible = p >= zones[z][1] && p <= zones[z][2];
+
+    // obyektlar hayoti
+    for (var i = 0; i < spinners.length; i++) {
+      var s = spinners[i];
+      s.o.rotation.x += s.x * dt; s.o.rotation.y += s.y * dt; s.o.rotation.z += s.z * dt;
     }
-    for (var j = 0; j < K; j++) { weights[j] /= sum; maxW = Math.max(maxW, weights[j]); uniforms.uW.value[j] = weights[j]; }
-    uniforms.uMorph.value = Math.pow(1 - maxW, 0.8) * 1.6;
-    // hero'da to'liq yorqin, matnli bo'limlarda vazminroq
-    uniforms.uOpacity.value = 0.75 + weights[0] * 0.25;
+    for (var j = 0; j < frames.length; j++) frames[j].rotation.z += dt * 0.12 * (j % 2 ? 1 : -1);
+    for (var k = 0; k < panels.length; k++) {
+      var g = panels[k];
+      g.position.y = g.userData.y + Math.sin(t * 0.5 + g.userData.phase) * 0.9;
+      g.rotation.y = g.userData.ry + Math.sin(t * 0.3 + g.userData.phase) * 0.12;
+    }
 
-    // sichqoncha
-    raycaster.setFromCamera(mouseNdc, camera);
-    if (raycaster.ray.intersectPlane(plane, hit)) uniforms.uMouse.value.copy(hit);
-    uniforms.uMouseOn.value += ((mouseOn ? 1 : 0) - uniforms.uMouseOn.value) * 0.06;
-
-    // kameraning yengil parallaksi
-    camX += (mouseNdc.x * (mouseOn ? 1.2 : 0) - camX) * 0.03;
-    camY += (mouseNdc.y * (mouseOn ? 0.8 : 0) - camY) * 0.03;
-    camera.position.x = camX;
-    camera.position.y = camY;
-    camera.lookAt(0, 0, 0);
+    // matnli bo'limlarda sahna biroz xiralashadi (o'qishga xalaqit bermasin)
+    var dim = 1 - 0.42 * smooth(0.35, 0.95, p);
+    canvas.style.opacity = dim.toFixed(3);
 
     renderer.render(scene, camera);
   }
