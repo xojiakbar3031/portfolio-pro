@@ -26,7 +26,7 @@
   document.body.classList.add("has-bg3d");
 
   var isMobile = window.matchMedia("(max-width: 1000px)").matches;
-  var WHITE = 0xdfe4ff, BLUE = 0x6e8bff;
+  var WHITE = 0xdfe4ff, BLUE = 0x6e8bff, CYAN = 0x5fe1ff;
 
   var scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0b0b0d, 0.017);
@@ -76,6 +76,14 @@
   var zones = [];
   function zone(o, from, to) { zones.push([o, from, to]); return o; }
 
+  // katta yumshoq nur — obyekt ortidagi "yorug'lik manbai"
+  function glow(color, size, opacity) {
+    var m = new THREE.SpriteMaterial({ map: sprite, color: color, transparent: true, opacity: opacity, blending: THREE.AdditiveBlending, depthWrite: false });
+    var sp = new THREE.Sprite(m);
+    sp.scale.set(size, size, 1);
+    return sp;
+  }
+
   var spinners = []; // har kadrda aylantiriladigan obyektlar: { o, x, y, z }
   function spin(o, x, y, z) { spinners.push({ o: o, x: x, y: y, z: z }); return o; }
 
@@ -85,6 +93,7 @@
   core.position.copy(CORE);
   scene.add(core);
   zone(core, -1, 1.25);
+  core.add(glow(BLUE, 34 * coreScale, 0.16));
   var coreScale = isMobile ? 0.72 : 1;
   [
     { r: 7.6, tilt: [1.18, 0, -0.32], color: WHITE, op: 0.8, speed: 0.22 },
@@ -140,12 +149,25 @@
   var frames = [];
   for (var f = 0; f < 30; f++) {
     var blue = f % 3 === 0;
-    var frame = polygon(9, 6, lineMat(blue ? BLUE : WHITE, blue ? 0.95 : 0.45));
+    var frame = polygon(9, 6, lineMat(blue ? BLUE : (f % 5 === 2 ? CYAN : WHITE), blue ? 0.95 : 0.45));
     frame.position.z = -28 - f * 3.8;
     frame.rotation.z = f * 0.13;
     if (blue) frame.add(polygon(5.2, 6, lineMat(BLUE, 0.35)));
     tunnel.add(frame);
     frames.push(frame);
+  }
+
+  // tunnel bo'ylab buralib ketgan 6 ta "rels" — tezlik hissini beradi
+  var rails = new THREE.Group();
+  tunnel.add(rails);
+  for (var r = 0; r < 6; r++) {
+    var rp = [];
+    for (var q = 0; q <= 90; q++) {
+      var rz = -26 - q * 1.28;
+      var ra = (r / 6) * Math.PI * 2 + q * 0.055;
+      rp.push(new THREE.Vector3(Math.cos(ra) * 9.6, Math.sin(ra) * 9.6, rz));
+    }
+    rails.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rp), lineMat(r % 2 ? CYAN : BLUE, 0.3)));
   }
 
   // ================= 3) WORK: suzuvchi ramkalar =================
@@ -155,8 +177,12 @@
     for (var i = 0; i < 16; i++) {
       var w = rnd(6, 13), h = w * rnd(0.55, 0.7);
       var g = new THREE.Group();
-      var blue = i % 4 === 0;
-      g.add(rect(w, h, lineMat(blue ? BLUE : WHITE, blue ? 0.95 : 0.6)));
+      var blue = i % 4 === 0, cyan = i % 4 === 2;
+      g.add(rect(w, h, lineMat(blue ? BLUE : (cyan ? CYAN : WHITE), blue || cyan ? 0.95 : 0.6)));
+      // shishasimon yuza
+      g.add(new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({
+        color: cyan ? CYAN : BLUE, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+      })));
       // ekran "sarlavha chizig'i" va ichki chiziqlar — interfeys silueti
       var bar = rect(w, h * 0.12, lineMat(blue ? BLUE : WHITE, 0.25));
       bar.position.y = h * 0.44;
@@ -193,12 +219,16 @@
     for (var k = 0; k < 4; k++) {
       var beam = new THREE.Mesh(
         new THREE.BoxGeometry(0.22, 30, 0.22),
-        new THREE.MeshBasicMaterial({ color: k % 2 ? WHITE : BLUE, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false })
+        new THREE.MeshBasicMaterial({ color: k % 2 ? CYAN : BLUE, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false })
       );
       beam.position.set(-21 + k * 14, 8, -282);
       scene.add(beam);
       zone(beam, 2.55, 3.9);
-      var base = polygon(2.2, 40, lineMat(k % 2 ? WHITE : BLUE, 0.6));
+      var halo = glow(k % 2 ? CYAN : BLUE, 9, 0.35);
+      halo.position.set(beam.position.x, -5, -282);
+      scene.add(halo);
+      zone(halo, 2.55, 3.9);
+      var base = polygon(2.2, 40, lineMat(k % 2 ? CYAN : BLUE, 0.7));
       base.rotation.x = Math.PI / 2;
       base.position.set(beam.position.x, -5.5, -282);
       scene.add(base);
@@ -216,7 +246,8 @@
     g.add(new THREE.Mesh(ico, new THREE.MeshBasicMaterial({
       color: WHITE, wireframe: true, transparent: true, opacity: 0.26, blending: THREE.AdditiveBlending, depthWrite: false
     })));
-    g.add(new THREE.Points(ico, pointsMat(BLUE, 0.55, 0.9)));
+    g.add(new THREE.Points(ico, pointsMat(CYAN, 0.55, 0.9)));
+    g.add(glow(BLUE, 52, 0.14));
     scene.add(g);
     zone(g, 3.05, 9);
     spin(g, 0.02, 0.09, 0);
@@ -316,7 +347,33 @@
   window.addEventListener("resize", resize);
   resize();
 
+  // ================= tezlik chiziqlari =================
+  // Tez scroll qilinganda Z o'qi bo'ylab cho'ziladigan nur chiziqlari ("warp").
+  var STREAKS = isMobile ? 140 : 280;
+  var streakBase = new Float32Array(STREAKS * 3);
+  var streakPos = new Float32Array(STREAKS * 6);
+  for (var st = 0; st < STREAKS; st++) {
+    var sa = Math.random() * Math.PI * 2, sr = 7 + Math.random() * 34;
+    streakBase[st * 3] = Math.cos(sa) * sr;
+    streakBase[st * 3 + 1] = Math.sin(sa) * sr * 0.6;
+    streakBase[st * 3 + 2] = 40 - Math.random() * 430;
+  }
+  var streakGeo = new THREE.BufferGeometry();
+  streakGeo.setAttribute("position", new THREE.BufferAttribute(streakPos, 3));
+  var streakMat = lineMat(WHITE, 0);
+  var streaks = new THREE.LineSegments(streakGeo, streakMat);
+  streaks.frustumCulled = false;
+  scene.add(streaks);
+
+  // ================= HUD (bob ko'rsatkichi) =================
+  var hudNum = document.getElementById("hudNum");
+  var hudName = document.getElementById("hudName");
+  var hudFill = document.getElementById("hudFill");
+  var CHAPTERS = ["INTRO", "ABOUT", "WORK", "PROCESS", "CONTACT"];
+  var chapter = -1;
+
   // ---------------- animatsiya ----------------
+  var INTRO_SECONDS = 2.8, introT = forced ? 1 : 0;
   var clock = new THREE.Clock();
   var running = true;
   var camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
@@ -351,12 +408,20 @@
     camLook.x += Math.sin(t * 0.23 + 1.3) * 0.35;
     camLook.y += Math.cos(t * 0.21) * 0.25;
 
+    // ochilish kadri: kamera uzoqdan uchib kelib, o'z joyiga qo'nadi
+    introT = Math.min(1, introT + dt / INTRO_SECONDS);
+    var introEase = 1 - Math.pow(1 - introT, 4);
+    var introLeft = (1 - introEase) * (1 - smooth(0.0, 0.4, p));
+    camPos.z += introLeft * 60;
+    camPos.y += introLeft * 10;
+    camPos.x -= introLeft * 14;
+
     camera.position.copy(camPos);
     camera.lookAt(camLook);
     // og'ish: sekin "nafas" + tunnelda buralish + tezlikka bog'liq burilish
     var targetRoll = Math.sin(t * 0.22) * 0.03 + smooth(0.8, 1.2, p) * (1 - smooth(1.5, 1.9, p)) * Math.sin(p * 6.0) * 0.22 + Math.max(-0.12, Math.min(0.12, vel * 0.08));
     roll += (targetRoll - roll) * 0.08;
-    camera.rotateZ(roll);
+    camera.rotateZ(roll + introLeft * 0.5);
     // tez harakatda ko'rish burchagi kengayadi ("warp")
     var targetFov = 50 + Math.min(16, Math.abs(vel) * 9);
     fov += (targetFov - fov) * 0.1;
@@ -377,8 +442,32 @@
       g.rotation.y = g.userData.ry + Math.sin(t * 0.3 + g.userData.phase) * 0.12;
     }
 
-    // matnli bo'limlarda sahna biroz xiralashadi (o'qishga xalaqit bermasin)
-    var dim = 1 - 0.42 * smooth(0.35, 0.95, p);
+    // tezlik chiziqlari: uzunligi va yorqinligi kamera tezligiga bog'liq
+    var speed = Math.min(1, Math.abs(vel) * 0.55 + introLeft * 1.2);
+    streakMat.opacity += (speed * 0.55 - streakMat.opacity) * 0.15;
+    if (streakMat.opacity > 0.01) {
+      var len = 0.6 + speed * 16;
+      for (var q2 = 0; q2 < STREAKS; q2++) {
+        var bx = streakBase[q2 * 3], by = streakBase[q2 * 3 + 1], bz = streakBase[q2 * 3 + 2];
+        var o = q2 * 6;
+        streakPos[o] = bx; streakPos[o + 1] = by; streakPos[o + 2] = bz;
+        streakPos[o + 3] = bx; streakPos[o + 4] = by; streakPos[o + 5] = bz - len;
+      }
+      streakGeo.attributes.position.needsUpdate = true;
+    }
+    streaks.visible = streakMat.opacity > 0.01;
+
+    // HUD: qaysi bobdamiz
+    var ch = Math.max(0, Math.min(4, Math.round(p)));
+    if (ch !== chapter && hudNum) {
+      chapter = ch;
+      hudNum.textContent = "0" + (ch + 1);
+      hudName.textContent = CHAPTERS[ch];
+    }
+    if (hudFill) hudFill.style.transform = "scaleX(" + Math.min(1, p / 4).toFixed(3) + ")";
+
+    // matnli bo'limlarda sahna ozgina xiralashadi; ochilishda silliq paydo bo'ladi
+    var dim = (1 - 0.22 * smooth(0.35, 0.95, p)) * Math.min(1, introT * 2.2);
     canvas.style.opacity = dim.toFixed(3);
 
     renderer.render(scene, camera);
